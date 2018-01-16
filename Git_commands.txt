@@ -1,0 +1,44 @@
+#--------------------------------------------------------------------------------------------------------------------------------
+#Commandes de base
+#--------------------------------------------------------------------------------------------------------------------------------
+
+git add votre_fichier.md #ajoute un fichier à l'index git
+git add . #ajoute tous les fichiers du répertoire à l'index
+
+git commit #commit les fichiers de l'index
+git commit -m "votre message"
+git commit --amend -m "votre nouveau message"
+git commit -a #pour mettre un jour un fichier de l'index et le commit
+
+git reset --hard #annule tous les changements depuis le dernier commit
+
+git status #permet de savoir ce qui a été modifié
+
+git push origin master #permet d'envoyer vos fichiers commited vers GitHub
+#origin fait référence au lieu d'envoi, donc GitHub
+#master fait référence à la branche des fichiers à envoyer, ici la principale "master"
+
+git clone votre_lien #télécharge l'intégralité d'un dossier de GitHub
+
+git pull origin master #permet de récupérer les fichiers committed depuis GitHub vers votre ordinateur
+
+#--------------------------------------------------------------------------------------------------------------------------------
+#Théorie des branches
+#--------------------------------------------------------------------------------------------------------------------------------
+
+git branch #affiche la liste des branches
+
+git checkout votre_branche #changer de branche
+
+git merge votre_branche #fusionne la branche où vous vous trouvez avec votre_branche
+
+#Que faire dans le cas d'un conflit ?
+#1-Don't panic.
+#2-Grab your towel.
+#3-Solve the conflict yourself. 
+#4-Tell git that you solve the conflict via "git commit".
+#5-Enjoy.
+
+git blame votre_fichier #permet de savoir qui a fait quelle modification sur votre_fichier
+
+
