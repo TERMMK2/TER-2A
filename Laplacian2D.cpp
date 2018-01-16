@@ -174,69 +174,6 @@ void EC_ClassiqueP::InitializeMatrix()
   }
 }
 
-// void EC_ClassiqueP::InitializeMatrix()
-// {
-//   system("rm -Rf EC_ClassiqueP");
-//   system("mkdir -p ./EC_ClassiqueP");
-//
-//   _x.resize(_Nx);
-//   _y.resize(_Ny);
-//   for (int j =0; j < _Nx ; j++)
-//   {
-//     _x(j) = _x_min + j*_h_x;
-//   }
-//
-//   for (int i = 0; i < _Ny ; i++)
-//   {
-//     _y(i) = _y_min + i*_h_y;
-//   }
-//
-//   _LapMat.resize(_Nx*_Ny,_Nx*_Ny);
-//
-//   double alpha = 1 + 2*_a*_deltaT/(_h_x*_h_x) + 2*_a*_deltaT/(_h_y*_h_y);
-//   double beta = -_a*_deltaT/(_h_x*_h_x);
-//   double gamma = -_a*_deltaT/(_h_y*_h_y);
-//
-//   vector<Triplet<double>> liste_elem;
-//
-//   liste_elem.push_back({0,0,0.5*(alpha + 1)});
-//   liste_elem.push_back({_Nx-1,_Nx-1,0.5*(alpha + 1)});
-//   liste_elem.push_back({(_Ny-1)*_Nx,(_Ny-1)*_Nx,0.5*(alpha + 1)});
-//   liste_elem.push_back({_Ny*_Nx-1,_Ny*_Nx-1,0.5*(alpha + 1)}); //Les 4 lignes précédentes correspondent aux quatre coins du maillage
-//
-//   for (int i = 1 ; i < _Ny - 1 ; i++)
-//   {
-//     liste_elem.push_back({_Nx*i, _Nx*i , alpha - _a*_deltaT/(_h_x*_h_x)}); //Bord gauche
-//     liste_elem.push_back({_Nx*(i+1) - 1 , _Nx*(i+1) - 1 , alpha - _a*_deltaT/(_h_x*_h_x)}); //Bord droit
-//   }
-//
-//   for (int i = 1 ; i < _Nx - 1 ; i++)
-//   {
-//     liste_elem.push_back({i,i,alpha - _a*_deltaT/(_h_y*_h_y)}); //Bord haut
-//     liste_elem.push_back({(_Ny-1)*_Nx + i , (_Ny-1)*_Nx + i, alpha - _a*_deltaT/(_h_y*_h_y)}); //Bord bas
-//     for (int j = 1 ; j < _Ny-1 ; j++)
-//     {
-//       liste_elem.push_back({_Nx*j + i, _Nx*j + i, alpha}); //Centre du maillage
-//     }
-//   }
-//
-//   for (int i = 0 ; i<_Ny*_Nx-1; i++)
-//   {
-//     if ((i+1)%_Nx!=0)
-//     {
-//       liste_elem.push_back({i,i+1,beta});
-//       liste_elem.push_back({i+1,i,beta});
-//     }
-//   }
-//   for (int i = 0 ; i<_Nx*(_Ny-1) ; i++)
-//   {
-//     liste_elem.push_back({i,_Nx+i,gamma});
-//     liste_elem.push_back({_Nx+i,i,gamma});
-//   }
-//
-//   _LapMat.setFromTriplets(liste_elem.begin(), liste_elem.end());
-// }
-
 void EC_ClassiqueM::DirectSolver (int nb_iterations)
 {
   SimplicialLLT <SparseMatrix<double> > solver;
@@ -352,7 +289,7 @@ void EC_ClassiqueM::ConditionsLimites()
   {
     for (int j = 0; j < _Nx ; j++) //Condition de flux en haut
     {
-      _sol(j) = _sol(j)-gamma*temp(j) - gamma*_Val_CL_haut*_h_y;
+      _sol(j) = _sol(j)-gamma*temp(j) + gamma*_Val_CL_haut*_h_y;
     }
   }
 
@@ -360,7 +297,7 @@ void EC_ClassiqueM::ConditionsLimites()
   {
     for (int j = 0; j < _Nx ; j++)
     {
-      _sol(_Nx*(_Ny -1)+ j) = _sol(_Nx*(_Ny -1)+ j)-gamma*temp(_Nx*(_Ny -1)+ j) - gamma*_Val_CL_bas*_h_y;
+      _sol(_Nx*(_Ny -1)+ j) = _sol(_Nx*(_Ny -1)+ j)-gamma*temp(_Nx*(_Ny -1)+ j) + gamma*_Val_CL_bas*_h_y;
     }
   }
 
@@ -368,14 +305,14 @@ void EC_ClassiqueM::ConditionsLimites()
   {
     for (int i = 0; i < _Ny; i++)
     {
-      _sol(i*_Nx) = _sol(i*_Nx)-beta*temp(i*_Nx) - beta*_Val_CL_gauche*_h_x;
+      _sol(i*_Nx) = _sol(i*_Nx)-beta*temp(i*_Nx) + beta*_Val_CL_gauche*_h_x;
     }
   }
   if (_CL_droite == "Neumann") //Condition de flux à droite
   {
     for (int i = 0; i < _Ny; i++)
     {
-      _sol((i+1)*_Nx - 1) = _sol((i+1)*_Nx - 1)-beta*temp((i+1)*_Nx - 1) - beta*_Val_CL_droite*_h_x;
+      _sol((i+1)*_Nx - 1) = _sol((i+1)*_Nx - 1)-beta*temp((i+1)*_Nx - 1) + beta*_Val_CL_droite*_h_x;
     }
   }
 
@@ -449,14 +386,14 @@ void EC_ClassiqueP::ConditionsLimites()
   {
     for (int j = 0; j < _Nx ; j++)
     {
-      _sol(j) = _sol(j)-gamma*_Val_CL_haut*_h_y;
+      _sol(j) = _sol(j)+gamma*_Val_CL_haut*_h_y;
     }
   }
   if (_CL_bas == "Neumann") //Condition de flux en bas
   {
     for (int j = 0; j < _Nx ; j++)
     {
-      _sol(_Nx*(_Ny -1)+ j) = _sol(_Nx*(_Ny -1)+ j)-gamma*_Val_CL_bas*_h_y;
+      _sol(_Nx*(_Ny -1)+ j) = _sol(_Nx*(_Ny -1)+ j)+gamma*_Val_CL_bas*_h_y;
     }
   }
 
@@ -464,14 +401,14 @@ void EC_ClassiqueP::ConditionsLimites()
   {
     for (int i = 0; i < _Ny; i++)
     {
-      _sol(i*_Nx) = _sol(i*_Nx)-beta*_Val_CL_gauche*_h_x;
+      _sol(i*_Nx) = _sol(i*_Nx)+beta*_Val_CL_gauche*_h_x;
     }
   }
   if (_CL_droite == "Neumann") //Condition de flux à droite
   {
     for (int i = 0; i < _Ny; i++)
     {
-      _sol((i+1)*_Nx - 1) = _sol((i+1)*_Nx - 1)-beta*_Val_CL_droite*_h_x;
+      _sol((i+1)*_Nx - 1) = _sol((i+1)*_Nx - 1)+beta*_Val_CL_droite*_h_x;
     }
   }
 }
