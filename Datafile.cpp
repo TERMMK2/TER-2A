@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 
+
 using namespace std;
 using namespace Eigen;
 
@@ -18,7 +19,7 @@ DataFile::DataFile(string file_name)
 
 void DataFile::ReadDataFile()
 {
-ifstream data_file(_file_name.data());
+  ifstream data_file(_file_name.data());
   if (!data_file.is_open())
     {
       cout << "Unable to open file " << _file_name << endl;
@@ -174,7 +175,7 @@ ifstream data_file(_file_name.data());
       cout << "Attention la valeur par défaut pour la CL haut (Neumann) est utilisé." << endl;
       _Cl_haut = "Neumann";
     }
-   if ((!_if_CL_bas) or (_CL_bas != "Dirichlet") or (_Cl_bas != "Neumann"))
+  if ((!_if_CL_bas) or (_CL_bas != "Dirichlet") or (_Cl_bas != "Neumann"))
     {
       cout << "---------------------------------------------------" << endl;
       cout << "Attention la valeur par défaut pour la CL bas (Neumann) est utilisé." << endl;
@@ -320,64 +321,82 @@ ifstream data_file(_file_name.data());
       _Solveur = "BiCGStab";
     }
 
-  // PAs fait a partir d'ici !
   
-  if (!_if_eps)
+  if (!_if_Schema)
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention, la valeur par défaut de epsilon (1e-5) est utilisé" << endl;
-      _eps = 1e-5;
+      cout << "Attention, le schéma n'est pas défini (pas grave y'en a pas pour l'instant ;)" << endl;
+      _Schema = "tkt_bro";
     }
   
-  if (!_if_kmax)
+  if (!_if_save_all_file)
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention, la valeur par défaut de kmax (3000) est utilisée." << endl;
-      _kmax = 3000;
+      cout << "Attention, la solution ne sera pas sauvegardé dans sa totalité" << endl;
+      _save_all_file = "non";
     }
 
-  if (!_if_save_r)
+  if (!_if_save_points_file)
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention, vous n'avez pas entrer de fichier pour sauvegarder le résidu" << endl;
-      cout << "Nous n'allons donc pas le sauvegarder--------------" <<endl;
-      _save_r = "non";
+      cout << "Attention, aucun point particulier de la solution ne sera sauvegardé" << endl;
+      _save_points_file = "non";
     }
 
-  if (!_if_save_sol)
+  if ((!_if_number_saved_points) and (_if_save_points_file))
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention, vous n'avez pas entrer de fichier pour sauvegarder la solution" << endl;
-      cout << "Nous n'allons donc pas la sauvegarder--------------" <<endl;
-      _save_sol = "non";
+      cout << "Attention, vous n'avez pas entré de nombre de points à sauvegarder " << endl;
+      cout << "Nous n'allons donc pas sauvegarder de points-------" <<endl;
+      _save_points_file = "non";
     }
-
-
-
-  //--------------------Verif diag dominante-----------------------------
-  double S(0.);
-  _check=true;
-  int i(0);
-  while (_check && (i<_n)) 
+  
+  if ((save_points_file != "non") and (_if_saved_points))
     {
-      S=0.;
-      for(int j=0;j<_n;j++)
-	{
-	  if (j!=i)
-	    S+=abs(_A(i,j));
-
-	}
-      if (_A(i,i) < S)
-	_check=false;
-      i++;
+      cout << "---------------------------------------------------" << endl;
+      cout << "Attention, vous n'avez pas entré de points à sauvegarder " << endl;
+      cout << "Nous n'allons donc pas sauvegarder de points-------" << endl;
+      _save_points_file = "non";
     }
 
-  if (!_check)
+
+  if ((save_points_file == "non") and (save_all_file == "non"))
     {
-    cout << "-----------------------------------------------------"<<'\n'
-	 << "Attention, la matrice A n'est pas à diagonale strictement dominante, la méthode de Jacobi risque de diverger." <<endl;
+      // Potentiellement ajouter des trucs qui t'affiche ton erreur et tout avec exit(1) -> a voir !
+      cout << "---------------------------------------------------" <<endl;
+      cout << "--------------------Attention----------------------" <<endl;
+      cout << "-----------------------/\--------------------------" <<endl;
+      cout << "----------------------/  \-------------------------" <<endl;
+      cout << "---------------------/ !! \------------------------" <<endl;
+      cout << "--------------------/______\-----------------------" <<endl;
+      cout << "---------------------------------------------------" <<endl;
+      cout << "---------------------------------------------------" <<endl<<endl;
+      cout << "----Erreur critique, auto-destruction en cours-----" <<endl<<endl;
+      cout << "---------------------------------------------------" <<endl;
+      cout << "-----------------------/\--------------------------" <<endl;
+      cout << "----------------------/  \-------------------------" <<endl;
+      cout << "---------------------/ !! \------------------------" <<endl;
+      cout << "--------------------/______\-----------------------" <<endl;
+      cout << "---------------------------------------------------" <<endl;
+      cout << "---------------------------------------------------" <<endl<<endl<<endl;
+      
+      cout << "Non je déconne, mais en vrai t'as pas mis de fichier de sauvegarde donctu risque pas de voir si ça a marché ou non (bon sauf si tu regarde juste si ta partie du code marche sans erreur, mais tu peux être sûr qu'il n'y a pas d'erreur si tu regarde pas la solution non ?)" <<endl<<endl;
+      cout << "Bref, je vais pas faire un stop au programme parce que je sais pas le faire mais sache que si ton PC fait des calculs en se moment, ils servent à rien."<<endl;
+      cout << "Sur ce mon message est fini, bonne journée à toi, jeune utilisateur quelque peu étourdi"<<endl;
+      cout << "P.S. : saucissons" <<endl;
+      cout << "P.P.S. : 2" <<endl;
+      cout << "P.P.P.S. : 50" <<endl;
+      cout << "P.P.P.P.S. : 1729"<<endl;
+      cout << "P.P.P.P.P.S. : 635318657" <<endl;
+      cout << "P.P.P.P.P.P.S. : Saura tu trouver de quelle suite il s'agit ?" << endl;
+      cout << "P.P.P.P.P.P.P.S. : Ainsi que le terme suivant ?" <<endl;
+      cout << "P.P.P.P.P.P.P.P.S. : En vrai te fatique pas c'est un problème ouvert de math de calculer le suivant, alors à moins que tu as 2 ans devant toi et un super calculateur tu trouvera surrement pas sans une idée de génie."<<endl;
+      cout << "P.P.P.P.P.P.P.P.P.S. : J'ai perdu ma soirée à essayer de le trouver avant de m'en rendre compte. :'(" <<endl;
+      cout << "P.P.P.P.P.P.P.P.P.P.S. : Mais j'ai appris plein de truc, ce qui est cool." <<endl;
+      cout << "P.P.P.P.P.P.P.P.P.P.P.S : Sur ce je vais me coucher en essayant de faire marcher git" <<endl;
+
     }
-  //---------------------------------------------------------------------
+
 }
 
 
