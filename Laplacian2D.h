@@ -20,12 +20,13 @@ class Laplacian2D // pas fini de modifier
 
     void Initialize(double x_min, double x_max, double y_min, double y_max, int Nx, int Ny, double a, double deltaT);
     void InitializeCL(std::string CL_bas, std::string CL_haut, std::string CL_gauche, std::string CL_droite, double Val_CL_bas, double Val_CL_haut, double Val_CL_gauche, double Val_CL_droite);
+    void UpdateCL(int num_it);
     virtual void InitializeMatrix() = 0;
     void InitializeCI(Eigen::VectorXd CI);
     virtual void DirectSolver(int nb_iterations) = 0;   // Résout le système _LapMat * _sol = _f avec un solveur direct.
     virtual void IterativeSolver(int nb_iterations) = 0;   // Résout le système _LapMat * _sol = _f avec un solveur itératif.
     void SaveSol(std::string name_file); // Écrit les solutions dans le fichier "name_file".
-    virtual void ConditionsLimites() = 0;
+    virtual void ConditionsLimites(int num_it) = 0;
   };
 
 class EC_ClassiqueM : public Laplacian2D //Première version avec un matrice identique quelles que soient les conditions aux bords
@@ -34,7 +35,7 @@ class EC_ClassiqueM : public Laplacian2D //Première version avec un matrice ide
     void InitializeMatrix();
     void DirectSolver(int nb_iterations);
     void IterativeSolver(int nb_iterations);
-    void ConditionsLimites();
+    void ConditionsLimites(int num_it);
 };
 
 class EC_ClassiqueP : public Laplacian2D //Seconde version avec une matrice qui dépend des conditions aux bords
@@ -43,5 +44,5 @@ class EC_ClassiqueP : public Laplacian2D //Seconde version avec une matrice qui 
     void InitializeMatrix();
     void DirectSolver(int nb_iterations);
     void IterativeSolver(int nb_iterations);
-    void ConditionsLimites();
+    void ConditionsLimites(int num_it);
 };
