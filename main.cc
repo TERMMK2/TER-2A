@@ -9,23 +9,23 @@ using namespace std;
 
 int main()
 {
-  int Nx = 200;
+  int Nx = 300;
   int Ny = 2;
   double xmin = 0.;
   double xmax = 0.01;
   double ymin = 0.;
   double ymax = 0.005;
   double a = 1./(1500*1000);
-  double deltaT = 0.01;
-  double tfinal = 10;
+  double deltaT = 0.05;
+  double tfinal = 100.;
   Eigen::VectorXd CI;
   string CL_bas = "Neumann"; // "Neumann" , "Dirichlet"
   string CL_haut = "Neumann";
-  string CL_gauche = "Dirichlet";
+  string CL_gauche = "Neumann_non_constant"; //Peut valoir "Neumann_non_constant"
   string CL_droite = "Neumann";
   double Val_CL_bas = 0; //Flux si CL_bas == "Neumann", Température si CL_bas == "Dirichlet"
   double Val_CL_haut = 0;
-  double Val_CL_gauche = 2900;
+  double Val_CL_gauche = 0; //Mettre 0 si CL_gauche == "Neumann_non_constant"
   double Val_CL_droite = 0;
   int nb_iterations = int(ceil(tfinal/deltaT));
   string Equation = "EC_ClassiqueP";
