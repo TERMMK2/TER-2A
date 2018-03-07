@@ -47,6 +47,19 @@ void Laplacian2D::InitializeCL(std::string CL_bas, std::string CL_haut, std::str
   _Val_CL_droite = Val_CL_droite;
 }
 
+void Laplacian2D::UpdateCL(int num_it)
+{
+  double t = num_it*_deltaT;
+  if (t <= 50.)
+  {
+    _Val_CL_gauche = 10000.*t;
+  }
+  else
+  {
+    _Val_CL_gauche = -9000.*(t-50.) + 500000.;
+  }
+}
+
 void EC_ClassiqueM::InitializeMatrix()
 {
   system("rm -Rf EC_ClassiqueM");
@@ -141,7 +154,7 @@ void EC_ClassiqueP::InitializeMatrix()
   _LapMat.setFromTriplets(liste_elem.begin(), liste_elem.end());
 
 
-  if (_CL_gauche == "Neumann")
+  if (_CL_gauche == "Neumann" or _CL_gauche == "Neumann_non_constant")
   {
     for (int i = 0 ; i < _Ny; i++)
     {
@@ -182,7 +195,7 @@ void EC_ClassiqueM::DirectSolver (int nb_iterations)
   for( int i=0 ; i<=nb_iterations ; i++)
     {
       EC_ClassiqueM::SaveSol("EC_ClassiqueM/sol_it_"+to_string(i)+".vtk");
-      EC_ClassiqueM::ConditionsLimites();
+      EC_ClassiqueM::ConditionsLimites(i);
       _f.resize(_Nx*_Ny);
       for (int j =0; j<_Nx*_Ny ; j++)
         {
@@ -200,7 +213,7 @@ void EC_ClassiqueP::DirectSolver (int nb_iterations)
   for( int i=0 ; i<=nb_iterations ; i++)
     {
       EC_ClassiqueP::SaveSol("EC_ClassiqueP/sol_it_"+to_string(i)+".vtk");
-      EC_ClassiqueP::ConditionsLimites();
+      EC_ClassiqueP::ConditionsLimites(i);
       _f.resize(_Nx*_Ny);
       for (int j =0; j<_Nx*_Ny ; j++)
         {
@@ -218,7 +231,7 @@ void EC_ClassiqueM::IterativeSolver (int nb_iterations)
   for( int i=0 ; i<=nb_iterations ; i++)
     {
       EC_ClassiqueM::SaveSol("EC_ClassiqueM/sol_it_"+to_string(i)+".vtk");
-      EC_ClassiqueM::ConditionsLimites();
+      EC_ClassiqueM::ConditionsLimites(i);
       _f.resize(_Nx*_Ny);
       for (int j =0; j<_Nx*_Ny ; j++)
         {
@@ -236,7 +249,7 @@ void EC_ClassiqueP::IterativeSolver (int nb_iterations)
   for( int i=0 ; i<=nb_iterations ; i++)
     {
       EC_ClassiqueP::SaveSol("EC_ClassiqueP/sol_it_"+to_string(i)+".vtk");
-      EC_ClassiqueP::ConditionsLimites();
+      EC_ClassiqueP::ConditionsLimites(i);
       _f.resize(_Nx*_Ny);
       for (int j =0; j<_Nx*_Ny ; j++)
         {
@@ -274,7 +287,7 @@ void Laplacian2D::SaveSol(string name_file)
   mon_flux.close();
 }
 
-void EC_ClassiqueM::ConditionsLimites()
+void EC_ClassiqueM::ConditionsLimites(int num_it)
 {
   Eigen :: VectorXd temp(_Nx*_Ny);
   double gamma = -_a*_deltaT/(_h_y*_h_y);
@@ -289,7 +302,7 @@ void EC_ClassiqueM::ConditionsLimites()
   {
     for (int j = 0; j < _Nx ; j++) //Condition de flux en haut
     {
-      _sol(j) = _sol(j)-gamma*temp(j) + gamma*_Val_CL_haut*_h_y;
+      _sol(j) = _sol(j)-gamma*temp(j) - gamma*_Val_CL_haut*_h_y;
     }
   }
 
@@ -297,7 +310,7 @@ void EC_ClassiqueM::ConditionsLimites()
   {
     for (int j = 0; j < _Nx ; j++)
     {
-      _sol(_Nx*(_Ny -1)+ j) = _sol(_Nx*(_Ny -1)+ j)-gamma*temp(_Nx*(_Ny -1)+ j) + gamma*_Val_CL_bas*_h_y;
+      _sol(_Nx*(_Ny -1)+ j) = _sol(_Nx*(_Ny -1)+ j)-gamma*temp(_Nx*(_Ny -1)+ j) - gamma*_Val_CL_bas*_h_y;
     }
   }
 
@@ -305,14 +318,24 @@ void EC_ClassiqueM::ConditionsLimites()
   {
     for (int i = 0; i < _Ny; i++)
     {
-      _sol(i*_Nx) = _sol(i*_Nx)-beta*temp(i*_Nx) + beta*_Val_CL_gauche*_h_x;
+      _sol(i*_Nx) = _sol(i*_Nx)-beta*temp(i*_Nx) - beta*_Val_CL_gauche*_h_x;
     }
   }
+
+  if (_CL_gauche == "Neumann_non_constant") //Condition de flux à gauche
+  {
+    Laplacian2D::UpdateCL(num_it);
+    for (int i = 0; i < _Ny; i++)
+    {
+      _sol(i*_Nx) = _sol(i*_Nx)-beta*temp(i*_Nx) - beta*_Val_CL_gauche*_h_x;
+    }
+  }
+
   if (_CL_droite == "Neumann") //Condition de flux à droite
   {
     for (int i = 0; i < _Ny; i++)
     {
-      _sol((i+1)*_Nx - 1) = _sol((i+1)*_Nx - 1)-beta*temp((i+1)*_Nx - 1) + beta*_Val_CL_droite*_h_x;
+      _sol((i+1)*_Nx - 1) = _sol((i+1)*_Nx - 1)-beta*temp((i+1)*_Nx - 1) - beta*_Val_CL_droite*_h_x;
     }
   }
 
@@ -347,7 +370,7 @@ void EC_ClassiqueM::ConditionsLimites()
   }
 }
 
-void EC_ClassiqueP::ConditionsLimites()
+void EC_ClassiqueP::ConditionsLimites(int num_it)
 {
   double gamma = -_a*_deltaT/(_h_y*_h_y);
   double beta = -_a*_deltaT/(_h_x*_h_x);
@@ -374,6 +397,7 @@ void EC_ClassiqueP::ConditionsLimites()
       _sol(i*_Nx) = _sol(i*_Nx)-beta*_Val_CL_gauche;
     }
   }
+
   if (_CL_droite == "Dirichlet") //Condition de température à droite
   {
     for (int i = 0; i < _Ny; i++)
@@ -386,14 +410,14 @@ void EC_ClassiqueP::ConditionsLimites()
   {
     for (int j = 0; j < _Nx ; j++)
     {
-      _sol(j) = _sol(j)+gamma*_Val_CL_haut*_h_y;
+      _sol(j) = _sol(j)-gamma*_Val_CL_haut*_h_y;
     }
   }
   if (_CL_bas == "Neumann") //Condition de flux en bas
   {
     for (int j = 0; j < _Nx ; j++)
     {
-      _sol(_Nx*(_Ny -1)+ j) = _sol(_Nx*(_Ny -1)+ j)+gamma*_Val_CL_bas*_h_y;
+      _sol(_Nx*(_Ny -1)+ j) = _sol(_Nx*(_Ny -1)+ j)-gamma*_Val_CL_bas*_h_y;
     }
   }
 
@@ -401,14 +425,24 @@ void EC_ClassiqueP::ConditionsLimites()
   {
     for (int i = 0; i < _Ny; i++)
     {
-      _sol(i*_Nx) = _sol(i*_Nx)+beta*_Val_CL_gauche*_h_x;
+      _sol(i*_Nx) = _sol(i*_Nx)-beta*_Val_CL_gauche*_h_x;
     }
   }
+
+  if (_CL_gauche == "Neumann_non_constant")  //Condition de flux à gauche
+  {
+    Laplacian2D::UpdateCL(num_it);
+    for (int i = 0; i < _Ny; i++)
+    {
+      _sol(i*_Nx) = _sol(i*_Nx)-beta*_Val_CL_gauche*_h_x;
+    }
+  }
+
   if (_CL_droite == "Neumann") //Condition de flux à droite
   {
     for (int i = 0; i < _Ny; i++)
     {
-      _sol((i+1)*_Nx - 1) = _sol((i+1)*_Nx - 1)+beta*_Val_CL_droite*_h_x;
+      _sol((i+1)*_Nx - 1) = _sol((i+1)*_Nx - 1)-beta*_Val_CL_droite*_h_x;
     }
   }
 }
