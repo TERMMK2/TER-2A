@@ -41,19 +41,19 @@ class DataFile
   int _number_saved_points;
   std::vector<std::vector<double>> _saved_points;
   
-  
+  std::string _restart_file;
   
 
 
   // Pour savoir si l'utilisateur a donner les paramètres 
   // ou si il faut utiliser les paramètres par défaut.
   bool _if_CL_droite;
-  bool _if_Cl_gauche;
-  bool _if_Cl_haut;
+  bool _if_CL_gauche;
+  bool _if_CL_haut;
   bool _if_CL_bas;
   bool _if_Val_CL_droite;
-  bool _if_Val_Cl_gauche;
-  bool _if_Val_Cl_haut;
+  bool _if_Val_CL_gauche;
+  bool _if_Val_CL_haut;
   bool _if_Val_CL_bas;
   bool _if_CI;
   bool _if_eq;
@@ -75,6 +75,8 @@ class DataFile
   bool _if_number_saved_points;
   bool _if_saved_points;
 
+  bool _if_restart_file;
+
 
  public:
 
@@ -84,18 +86,35 @@ class DataFile
   // Lecture du fichier de donnée // Pas fait encore ça !
   void ReadDataFile();
 
-  inline int Get_n() {return _n; };
-  inline Eigen::MatrixXd Get_A() {return _A; };
-  inline std::string Get_Solveur() {return _Solveur;};
-  inline std::string Get_prec() {return _prec;};
-  inline std::string Get_methode_prec() {return _methode_prec;};
-  inline double Get_arg_prec() {return _arg_prec;};
-  inline int Get_m() {return _m;};
-  inline double Get_eps() {return _eps;};
-  inline int Get_kmax() {return _kmax;};
-  inline bool Get_check() {return _check;}; 
-  inline std::string Get_save_r() {return _save_r;};
-  inline std::string Get_save_sol() {return _save_sol;};
+  inline std::string Get_CL_droite() {return _CL_droite;}
+  inline std::string Get_CL_gauche() {return _CL_gauche;}
+  inline std::string Get_CL_haut() {return _CL_haut;}
+  inline std::string Get_CL_bas() {return _CL_bas;}
+  inline double Get_Val_CL_droite() {return _Val_CL_droite;}
+  inline double Get_Val_CL_gauche() {return _Val_CL_gauche;}
+  inline double Get_Val_CL_haut() {return _Val_CL_haut;}
+  inline double Get_Val_CL_bas() {return _Val_CL_bas;}
+
+  inline double Get_CI() {return _CI;}
+  inline std::string Get_eq() {return _eq;}
+  inline int Get_N_x() {return _N_x;}
+  inline int Get_N_y() {return _N_y;}
+  inline double Get_x_min() {return _x_min;}
+  inline double Get_x_max() {return _x_max;}
+  inline double Get_y_min() {return _y_min;}
+  inline double Get_y_max() {return _y_max;}
+  inline double Get_deltaT() {return _deltaT;}
+  inline double Get_T_final() {return _T_final;}
+  inline std::string Get_Solveur() {return _Solveur;}
+  inline std::string Get_Schema() {return _Schema;}
+  
+  inline std::string Get_save_all_file() {return _save_all_file;}
+
+  inline std::string Get_save_points_file() {return _save_points_file;}
+  inline int Get_number_saved_points() {return _number_saved_points;}
+  inline  std::vector<std::vector<double>> Get_saved_points() {return _saved_points;}
+  
+  inline std::string Get_restart_file() {return _restart_file;}
 
 };
 
