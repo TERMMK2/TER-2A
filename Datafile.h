@@ -7,7 +7,7 @@
 class DataFile
 {
  private:
-  //Nom du fichier de donnée d'entrée
+  //Nom du fichier de données d'entrée
   const std::string _file_name;
 
   // Variables à utiliser // Ajouter un truc pour le systeme d'adaptation du maillage
@@ -36,8 +36,8 @@ class DataFile
   std::string _Solveur;
   std::string _Schema; // A voir si vraiment utile !
 
-  std::string _save_all_file;  // Nom du fichier qui contiendra la solution pour tout points
-  std::string _save_points_file; // Nom du ou des fichiers qui contiendra l'évolution de T en fonction du temps pour 1 unique point ( si plusieurs points selectionnés les fichiers s'apellerons tous comme _save_points_file + le numéro du point
+  std::string _save_all_file;  // Nom du fichier qui contiendra la solution pour tous les points
+  std::string _save_points_file; // Nom du ou des fichiers qui contiendra l'évolution de T en fonction du temps pour 1 unique point ( si plusieurs points selectionnés les fichiers s'apelleront tous comme _save_points_file + le numéro du point
   int _number_saved_points;
   std::vector<std::vector<double>> _saved_points;
   
@@ -45,7 +45,7 @@ class DataFile
   
 
 
-  // Pour savoir si l'utilisateur a donner les paramètres 
+  // Pour savoir si l'utilisateur a donné les paramètres 
   // ou si il faut utiliser les paramètres par défaut.
   bool _if_CL_droite;
   bool _if_CL_gauche;
@@ -67,7 +67,7 @@ class DataFile
   bool _if_T_final;
 
   bool _if_Solveur;
-  bool _if_Schema; // a voir si utile ou pas pas fait ça et la suite
+  bool _if_Schema; // à voir si utile ou pas pas fait ça et la suite
 
   bool _if_save_all_file;
 
@@ -83,7 +83,7 @@ class DataFile
   // Constructeur
   DataFile(std::string file_name);
 
-  // Lecture du fichier de donnée // Pas fait encore ça !
+  // Lecture du fichier de données // Pas fait encore ça !
   void ReadDataFile();
 
   inline std::string Get_CL_droite() {return _CL_droite;}
