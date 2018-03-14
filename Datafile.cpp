@@ -15,7 +15,7 @@ DataFile::DataFile(string file_name)
 {}
 
 
-//Lecture du fichier de donnée
+//Lecture du fichier de données
 
 void DataFile::ReadDataFile()
 {
@@ -238,25 +238,25 @@ void DataFile::ReadDataFile()
   if ((!_if_CL_droite) or ((_CL_droite != "Dirichlet") and (_CL_droite != "Neumann")))
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention la valeur par défaut pour la CL droite (Neumann) est utilisé." << endl;
+      cout << "Attention la valeur par défaut pour la CL droite (Neumann) est utilisée." << endl;
       _CL_droite = "Neumann";
     }
   if ((!_if_CL_gauche) or ((_CL_gauche != "Dirichlet") and (_CL_gauche != "Neumann")))
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention la valeur par défaut pour la CL gauche (Dirichlet) est utilisé." << endl;
+      cout << "Attention la valeur par défaut pour la CL gauche (Dirichlet) est utilisée." << endl;
       _CL_gauche = "Dirichlet";
     }
   if ((!_if_CL_haut) or ((_CL_haut != "Dirichlet") and (_CL_haut != "Neumann")))
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention la valeur par défaut pour la CL haut (Neumann) est utilisé." << endl;
+      cout << "Attention la valeur par défaut pour la CL haut (Neumann) est utilisée." << endl;
       _CL_haut = "Neumann";
     }
   if ((!_if_CL_bas) or ((_CL_bas != "Dirichlet") and (_CL_bas != "Neumann")))
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention la valeur par défaut pour la CL bas (Neumann) est utilisé." << endl;
+      cout << "Attention la valeur par défaut pour la CL bas (Neumann) est utilisée." << endl;
       _CL_bas = "Neumann";
     }
   
@@ -328,7 +328,7 @@ void DataFile::ReadDataFile()
   if (!_if_CI)
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention, la valeur par défaut pour la CI (293) est utilisé. " << endl;
+      cout << "Attention, la valeur par défaut pour la CI (293) est utilisée. " << endl;
       _CI = 293;      
     }
 
@@ -336,7 +336,7 @@ void DataFile::ReadDataFile()
     {
       cout << "---------------------------------------------------" << endl;
       cout << "Attention, vous n'avez pas entré d'équation ou celle que vous avez choisie n'existe pas." <<endl;
-      cout <<"L'equation par défaut (EC_ClassiqueP) va donc être utilisée." << endl;
+      cout <<"L'équation par défaut (EC_ClassiqueP) va donc être utilisé." << endl;
       _eq = "EC_ClassiqueP";
     }
 
@@ -410,7 +410,7 @@ void DataFile::ReadDataFile()
   if (!_if_save_all_file)
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention, la solution ne sera pas sauvegardé dans sa totalité" << endl;
+      cout << "Attention, la solution ne sera pas sauvegardée dans sa totalité" << endl;
       _save_all_file = "non";
     }
 
@@ -418,7 +418,7 @@ void DataFile::ReadDataFile()
     {
       cout << "---------------------------------------------------" << endl;
       cout << "Attention, il manque un ou plusieurs points à sauvegarder" << endl;
-      cout << "Nous n'allons donc pas sauvegarder de points de points" <<endl;
+      cout << "Nous n'allons donc pas sauvegarder de point" <<endl;
       _save_points_file = "non";
     }
 
@@ -433,8 +433,8 @@ void DataFile::ReadDataFile()
   if ((_save_points_file != "non") and (!_if_saved_points))
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention, vous n'avez pas entré de points à sauvegarder (ou vous en avez oublier un)" << endl;
-      cout << "Nous n'allons donc pas sauvegarder de points-------" << endl;
+      cout << "Attention, vous n'avez pas entré de point à sauvegarder (ou vous en avez oublié un)" << endl;
+      cout << "Nous n'allons donc pas sauvegarder de point-------" << endl;
       _save_points_file = "non";
     }
 
@@ -450,17 +450,17 @@ void DataFile::ReadDataFile()
       cout << "---------------------------------------------------" <<endl;
       cout << "---------------------------------------------------" <<endl<<endl<<endl;
       
-      cout << "Non je déconne, mais en vrai t'as pas mis de fichier de sauvegarde donctu risque pas de voir si ça a marché ou non (bon sauf si tu regarde juste si ta partie du code marche sans erreur, mais tu peux être sûr qu'il n'y a pas d'erreur si tu regarde pas la solution non ?)" <<endl<<endl;
-      cout << "Bref, je vais pas faire un stop au programme parce que je sais pas le faire mais sache que si ton PC fait des calculs en se moment, ils servent à rien."<<endl;
-      cout << "Sur ce mon message est fini, bonne journée à toi, jeune utilisateur quelque peu étourdi"<<endl;
+      cout << "Non je déconne, mais en vrai t'as pas mis de fichier de sauvegarde donctu risques pas de voir si ça a marché ou non (bon sauf si tu regardes juste si ta partie du code marche sans erreur, mais tu peux être sûr qu'il n'y a pas d'erreur si tu regardes pas la solution non ?)" <<endl<<endl;
+      cout << "Bref, je vais pas faire un stop au programme parce que je sais pas le faire mais sache que si ton PC fait des calculs en ce moment, ils servent à rien."<<endl;
+      cout << "Sur ce, mon message est fini. Bonne journée à toi, jeune utilisateur quelque peu étourdi"<<endl;
       cout << "P.S. : saucissons" <<endl;
       cout << "P.P.S. : 2" <<endl;
       cout << "P.P.P.S. : 50" <<endl;
       cout << "P.P.P.P.S. : 1729"<<endl;
       cout << "P.P.P.P.P.S. : 635318657" <<endl;
-      cout << "P.P.P.P.P.P.S. : Saura tu trouver de quelle suite il s'agit ?" << endl;
+      cout << "P.P.P.P.P.P.S. : Sauras-tu trouver de quelle suite il s'agit ?" << endl;
       cout << "P.P.P.P.P.P.P.S. : Ainsi que le terme suivant ?" <<endl;
-      cout << "P.P.P.P.P.P.P.P.S. : En vrai te fatique pas c'est un problème ouvert de math de calculer le suivant, alors à moins que tu as 2 ans devant toi et un super calculateur tu trouvera surrement pas sans une idée de génie."<<endl;
+      cout << "P.P.P.P.P.P.P.P.S. : En vrai te fatique pas c'est un problème ouvert de math de calculer le suivant, alors à moins que tu aies 2 ans devant toi et un super calculateur tu trouveras sûrement pas sans une idée de génie."<<endl;
       cout << "P.P.P.P.P.P.P.P.P.S. : J'ai perdu ma soirée à essayer de le trouver avant de m'en rendre compte. :'(" <<endl;
       cout << "P.P.P.P.P.P.P.P.P.P.S. : Mais j'ai appris plein de truc, ce qui est cool." <<endl;
       cout << "P.P.P.P.P.P.P.P.P.P.P.S : Sur ce je vais me coucher en essayant de faire marcher git" <<endl;
