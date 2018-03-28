@@ -1,47 +1,57 @@
 CL droite
-Neumann 
+Neumann 0
 
 CL gauche
-Dirichlet 3
+Neumann_non_constant 2900
 
 CL haut
-Neumann 4
+Neumann 0
 
 CL bas 
-Neumann 5
+Neumann 0
 
 CI
-12
+290
 
 Equation
 EC_ClassiqueM
 
 N_x
-10
+200
 
 N_y
-12
+2
 
 x_min
 0
 
 x_max
-10
+0.05
 
 y_min
-0
+0.
 
 y_max
-2
+0.005
 
 delta t
-0.01
+0.05
 
 T final
-1
+100
+
+lambda
+1.
+
+rho
+1000.
+
+Cp
+1500.
+
 
 Solveur
-BiCGStab
+direct
 
 Schema
 tkt_bro
@@ -53,15 +63,17 @@ Fichier sauvegarde points
 sol_pts_1
 
 Nombre de points à sauver
-3
+5
 
 Points à sauver
-1 2
-3.4 5
-5.6 7
+0.000 0.0025
+0.001 0.0025
+0.002 0.0025
+0.003 0.0025
+0.004 0.0025
 
 Fichier de redemarrage
-reload_1
+non
 
 
 
