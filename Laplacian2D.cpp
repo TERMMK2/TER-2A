@@ -722,3 +722,378 @@ void EC_ClassiqueP::ConditionsLimites(int num_it)
   }
 }
 
+void EC_Pyrolyse::Initialize(DataFile data_file)
+{
+  _CL_droite = data_file.Get_CL_droite();
+  _CL_gauche = data_file.Get_CL_gauche();
+  _CL_haut = data_file.Get_CL_haut();
+  _CL_bas = data_file.Get_CL_bas();
+  _Val_CL_droite = data_file.Get_Val_CL_droite();
+  _Val_CL_gauche = data_file.Get_Val_CL_gauche();
+  _Val_CL_haut = data_file.Get_Val_CL_haut();
+  _Val_CL_bas = data_file.Get_Val_CL_bas();
+
+  _Nx = data_file.Get_N_x();
+  _Ny = data_file.Get_N_y();
+  _x_min = data_file.Get_x_min();
+  _x_max = data_file.Get_x_max();
+  _y_min = data_file.Get_y_min();
+  _y_max = data_file.Get_y_max();
+  _deltaT = data_file.Get_deltaT();
+  //_T_final = data_file.Get_T_final(); -> inutile ici
+  _Solveur = data_file.Get_Solveur();
+  //Schema = data_file.Get_Schema(); -> pour l'instant ne sert à rien
+
+  _FS = 0.;
+  _FN = 0.;
+  _FE = 0.;
+  _FO = 0.;
+  _rho_v = 1500.;
+  _rho_p = 1000.;
+  _Cp = 1000.;
+  _Lambda = 1.;
+  _A = 1000.;
+  _Ta = 6000.;
+
+  _RhoTilde.resize(_Nx*_Ny);
+
+
+  _save_all_file = data_file.Get_save_all_file();
+
+  _save_points_file = data_file.Get_save_points_file();
+  _number_saved_points = data_file.Get_number_saved_points();
+  _saved_points = data_file.Get_saved_points();
+
+  _restart_file = data_file.Get_restart_file();
+
+
+  _h_y = (_y_max-_y_min)/(_Ny+1.);
+  _h_x = (_x_max-_x_min)/(_Nx+1.);
+
+  cout << "valeur de _h_y " << _h_y << endl;
+  cout << "valeur de _h_x " << _h_x << endl;
+  cout << "cfl :" << _Lambda*_deltaT/(_rho_v*_Cp)*(1/(_h_x*_h_x) + 1/(_h_y*_h_y)) << endl;
+
+
+  //-----------Def de la CI--------------
+  if (_restart_file == "non")
+    {
+      _sol_T.resize(_Nx*_Ny);
+      _sol_R.resize(_Nx*_Ny);
+      for(int i=0; i < _Ny; i++)
+	{
+	  for(int j=0; j < _Nx; j++)
+  	    {
+  	    _sol_T(j + i*_Nx) = 293.; //data_file.Get_CI_T();
+	      _sol_R(j + i*_Nx) = 1500.; //data_file.Get_CI_R();
+  	    }
+	}
+
+  //     if ((data_file.Get_eq() == "EC_ClassiqueM") or (data_file.Get_eq() == "EC_ClassiqueP"))
+	// {
+	//   _a = data_file.Get_lambda()/(data_file.Get_rho()*data_file.Get_Cp());
+	// }
+      //else if : mettre ici les CI pour lambda et rho et def Cp.
+
+      if (_save_all_file !="non")
+	{
+	  system(("rm -Rf "+_save_all_file).c_str());
+	  system(("mkdir -p ./"+_save_all_file).c_str());
+	}
+
+      if (_save_points_file !="non")
+	{
+	  system(("rm -Rf "+_save_points_file).c_str());
+	  system(("mkdir -p ./"+_save_points_file).c_str());
+	}
+
+    }
+  else
+    {//Mettre ici le truc pour le restart file
+    }
+}
+
+
+void EC_Pyrolyse::Flux_Cal(int i, int j)
+{
+  _FN = 0; _FS = 0; _FE = 0; _FO = 0;
+
+  double Tg,Td,Tb,Th;
+
+  //Modifier les valeurs limites en fonction des conditions
+  if (_CL_gauche == "Neumann" or _CL_gauche == "Neumann_non_constant")
+    Tg = _sol_T[_Nx*i+0] - _h_x*_Val_CL_gauche;
+  else
+    Tg = _Val_CL_gauche;
+
+  if (_CL_droite == "Neumann")
+    Td = _sol_T[_Nx*i+(_Nx-1)] + _h_x*_Val_CL_droite;
+  else
+    Td = _Val_CL_droite;
+
+  if (_CL_haut == "Neumann")
+    Th = _sol_T[_Nx*(_Ny-1)+j] + _h_y*_Val_CL_haut;
+  else
+    Th = _Val_CL_haut;;
+
+  if (_CL_bas == "Neumann")
+    Tb = _sol_T[_Nx*0+j] - _h_y*_Val_CL_bas;
+  else
+    Tb = _Val_CL_bas;
+
+
+  if((i>0) and (i<_Ny-1))
+    {
+      if((j>0) and (j<_Nx-1))
+	{
+	  _FN = _Lambda*(_sol_T[_Nx*(i+1)+j] - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = _Lambda*(_sol_T[_Nx*i+j] - _sol_T[_Nx*(i-1)+j])/_h_y;
+	  _FE = _Lambda*(_sol_T[_Nx*i+(j+1)] - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = _Lambda*(_sol_T[_Nx*i+j] - _sol_T[_Nx*i+(j-1)])/_h_x;
+	}
+      else if (j==0)
+	{
+	  _FN = _Lambda*(_sol_T[_Nx*(i+1)+j] - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = _Lambda*(_sol_T[_Nx*i+j] - _sol_T[_Nx*(i-1)+j])/_h_y;
+	  _FE = _Lambda*(_sol_T[_Nx*i+(j+1)] - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = _Lambda*(_sol_T[_Nx*i+j] - Tg)/_h_x;
+	}
+      else if (j==_Nx-1)
+	{
+	  _FN = _Lambda*(_sol_T[_Nx*(i+1)+j] - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = _Lambda*(_sol_T[_Nx*i+j] - _sol_T[_Nx*(i-1)+j])/_h_y;
+	  _FE = _Lambda*(Td - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = _Lambda*(_sol_T[_Nx*i+j] - _sol_T[_Nx*i+(j-1)])/_h_x;
+	}
+    }
+  else if (i==0)
+    {
+      if((j>0) and (j<_Nx-1))
+	{
+	  _FN = _Lambda*(_sol_T[_Nx*(i+1)+j] - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = _Lambda*(_sol_T[_Nx*i+j] - Tb)/_h_y;
+	  _FE = _Lambda*(_sol_T[_Nx*i+(j+1)] - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = _Lambda*(_sol_T[_Nx*i+j] - _sol_T[_Nx*i+(j-1)])/_h_x;
+	}
+      else if (j==0)
+	{
+	  _FN = _Lambda*(_sol_T[_Nx*(i+1)+j] - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = _Lambda*(_sol_T[_Nx*i+j] - Tb)/_h_y;
+	  _FE = _Lambda*(_sol_T[_Nx*i+(j+1)] - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = _Lambda*(_sol_T[_Nx*i+j] - Tg)/_h_x;
+	}
+      else if (j==_Nx-1)
+	{
+	  _FN = _Lambda*(_sol_T[_Nx*(i+1)+j] - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = _Lambda*(_sol_T[_Nx*i+j] - Tb)/_h_y;
+	  _FE = _Lambda*(Td - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = _Lambda*(_sol_T[_Nx*i+j] - _sol_T[_Nx*i+(j-1)])/_h_x;
+	}
+    }
+  else if (i==_Ny-1)
+    {
+      if((j>0) and (j<_Nx-1))
+	{
+	  _FN = _Lambda*(Th - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = _Lambda*(_sol_T[_Nx*i+j] - _sol_T[_Nx*(i-1)+j])/_h_y;
+	  _FE = _Lambda*(_sol_T[_Nx*i+(j+1)] - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = _Lambda*(_sol_T[_Nx*i+j] - _sol_T[_Nx*i+(j-1)])/_h_x;
+	}
+      else if (j==0)
+	{
+	  _FN = _Lambda*(Th - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = _Lambda*(_sol_T[_Nx*i+j] - _sol_T[_Nx*(i-1)+j])/_h_y;
+	  _FE = _Lambda*(_sol_T[_Nx*i+(j+1)] - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = _Lambda*(_sol_T[_Nx*i+j] -  Tg)/_h_x;
+	}
+      else if (j==_Nx-1)
+	{
+	  _FN = _Lambda*(Th - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = _Lambda*(_sol_T[_Nx*i+j] - _sol_T[_Nx*(i-1)+j])/_h_y;
+	  _FE = _Lambda*(Td - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = _Lambda*(_sol_T[_Nx*i+j] - _sol_T[_Nx*i+(j-1)])/_h_x;
+	}
+    }
+}
+
+
+void EC_Pyrolyse::Rho_Cal_P()
+{
+  double k;
+  // k = _A*_rho_p/(_rho_v - _rho_p);
+  k = -_A*_rho_v/(_rho_v - _rho_p);
+
+  Eigen::VectorXd C;
+  C.resize(_Nx*_Ny);
+  for (int i=0; i<_Nx*_Ny; i++)
+    {
+      //Euler Exp
+      // C[i] = k*exp(-_Ta/_sol_T[i]);
+      // _RhoTilde[i] = (_deltaT*C[i]+1)*_sol_R[i] - _deltaT*C[i]*_rho_v;
+
+      //sol exacte
+      C[i] = exp(-_Ta/_sol_T[i]);
+      // _RhoTilde[i] = _sol_R[i]*((exp(k*_deltaT)-1)*C[i]+1) - k*_rho_v*C[i]*_deltaT;
+      _RhoTilde[i] = _sol_R[i]*exp(k*C[i]*_deltaT) - k*_rho_p*_deltaT;
+    }
+}
+
+
+void EC_Pyrolyse::Rho_Cal_C()
+{
+  double k;
+  // k = _A*_rho_p/(_rho_v - _rho_p);
+  k = -_A*_rho_v/(_rho_v - _rho_p);
+
+  Eigen::VectorXd C;
+  C.resize(_Nx*_Ny);
+  for (int i=0; i<_Nx*_Ny; i++)
+    {
+      //Euler Exp
+      // C[i] = k*exp(-_Ta/_sol_T[i]);
+      // _sol_R[i] = (_deltaT*C[i]+1)*_sol_R[i] - _deltaT*C[i]*_rho_v;
+
+      //sol exacte
+      C[i] = exp(-_Ta/_sol_T[i]);
+      // _sol_R[i] = _sol_R[i]*((exp(k*_deltaT)-1)*C[i]+1) - k*_rho_v*C[i]*_deltaT;
+      _sol_R[i] = _sol_R[i]*exp(k*C[i]*_deltaT) - k*_rho_p*_deltaT;
+    }
+}
+
+
+void EC_Pyrolyse::T_Cal()
+{
+  Eigen::VectorXd Tbis;
+  Tbis.resize(_Nx*_Ny);
+  for (int i =0; i<_Nx*_Ny ; i++)
+  {
+    Tbis(i) = _sol_T(i);
+  }
+
+  for (int i=0; i<_Ny; i++)
+    {
+      for (int j=0; j<_Nx; j++)
+	{
+	  EC_Pyrolyse::Flux_Cal(i,j);
+	  Tbis[i*_Nx+j] = (_deltaT*((_FE-_FO)/_h_x + (_FN-_FS)/_h_y))/(_RhoTilde[i*_Nx+j]*_Cp) + Tbis[i*_Nx+j];
+    //Tbis[i*_Nx+j] = (_deltaT*((_FE-_FO)/_h_x + (_FN-_FS)/_h_y))/(1000*_Cp) + Tbis[i*_Nx+j];
+	}
+    }
+
+  for (int i =0; i<_Nx*_Ny ; i++)
+  {
+    _sol_T(i) = Tbis(i);
+  }
+
+
+
+}
+
+
+void EC_Pyrolyse::SaveSol_bis(int iteration)
+{
+  ofstream mon_flux;
+  string name_file1 = _save_all_file+"/solT_it_"+to_string(iteration)+".vtk";
+  mon_flux.open(name_file1, ios::out);
+  mon_flux << "# vtk DataFile Version 3.0" << endl
+	   << "cell" << endl
+	   << "ASCII" << endl
+	   << "DATASET STRUCTURED_POINTS" << endl
+	   << "DIMENSIONS " << _Nx << " " << _Ny << " 1" << endl
+	   << "ORIGIN 0 0 0" << endl
+	   << "SPACING " + to_string((_x_max-_x_min)/_Nx)+ " " + to_string((_y_max-_y_min)/_Ny) +" 1" << endl
+	   << "POINT_DATA " << _Nx*_Ny << endl
+	   << "SCALARS sample_scalars double" << endl
+	   << "LOOKUP_TABLE default" << endl;
+
+  for(int i=_Ny-1; i>=0; i--)
+    {
+      for(int j=0; j<_Nx; j++)
+	{
+	  mon_flux << _sol_T[j + i*_Nx] << " ";
+	}
+      mon_flux << endl;
+    }
+
+  mon_flux.close();
+
+  // string name_file2 = _save_all_file+"/solR_it_"+to_string(iteration)+".vtk";
+  // mon_flux.open(name_file2, ios::out);
+  // mon_flux << "# vtk DataFile Version 3.0" << endl
+  // 	   << "cell" << endl
+  // 	   << "ASCII" << endl
+  // 	   << "DATASET STRUCTURED_POINTS" << endl
+  // 	   << "DIMENSIONS " << _Nx << " " << _Ny << " 1" << endl
+  // 	   << "ORIGIN 0 0 0" << endl
+  // 	   << "SPACING " + to_string((_x_max-_x_min)/_Nx)+ " " + to_string((_y_max-_y_min)/_Ny) +" 1" << endl
+  // 	   << "POINT_DATA " << _Nx*_Ny << endl
+  // 	   << "SCALARS sample_scalars double" << endl
+  // 	   << "LOOKUP_TABLE default" << endl;
+
+
+  // for(int i=_Ny-1; i>=0; i--)
+  //   {
+  //     for(int j=0; j<_Nx; j++)
+  // 	{
+  // 	  mon_flux << _sol_R(j + i*_Nx) << " ";
+  // 	}
+  //     mon_flux << endl;
+  //   }
+
+  // mon_flux.close();
+}
+
+
+void EC_Pyrolyse::Advance(int nb_iterations)
+{
+  //vector< shared_ptr<ofstream> > mes_flux;
+
+  // if(_save_points_file != "non")
+  //   {
+  //     //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
+  //     for (int i=0; i<_number_saved_points; i++)
+  // 	{
+  // 	  shared_ptr<ofstream> flux(new ofstream);
+  // 	  flux->open(_save_points_file+"/point_"+to_string(i), ios::out);
+  // 	  mes_flux.push_back(flux);
+  // 	}
+  //   }
+
+
+  for( int i=0 ; i<=nb_iterations ; i++)
+    {
+      // Systeme de sauvegarde de points :---------------------------------
+      if (_save_all_file != "non")
+	{
+	  EC_Pyrolyse::SaveSol_bis(i);
+	}
+
+      // if (_save_points_file != "non")
+      // 	{
+      // 	  char* truc = new char;
+      // 	  for (int j=0; j<_number_saved_points; j++)
+      // 	    {
+      // 	      double truc_b1, truc_b2;
+      // 	      truc_b1 = i*_deltaT;
+      // 	      int pos = floor((_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y));
+      // 	      truc_b2 = _sol(pos) ;
+      // 	      sprintf(truc, "%f  %f", truc_b1, truc_b2);
+      // 	      mes_flux[j]->write(truc,16);
+      // 	      mes_flux[j]->write("\n",1);
+      // 	      //Bon alors je vais expliquer un peu le bordel que c'est :
+      // 	      //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement
+      // 	      //Et à cause de ça je peux pas faire << comme d'hab
+      // 	      //Donc j'utilise write (qui marche avec les pointeurs mais qui est plus chiant à utiliser) et c'est pour ça que c'est dégueu
+      // 	      //Mais en gros ça marche comme ça (d'après ce que j'ai pigé) :
+      // 	      //Tu utilise sprintf pour transformer tes nombres en des chaine de charactères puis write pour l'écrire dans ton fichier
+      // 	      //Voilà. (Si vous avez besoin d'y retoucher demander moi avant svp)
+      // 	    }
+
+      //}
+
+      Rho_Cal_P();
+      Laplacian2D::UpdateCL(i+1);
+      T_Cal();
+      Rho_Cal_C();
+    }
+}
