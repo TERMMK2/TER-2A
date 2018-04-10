@@ -1,6 +1,6 @@
 # Compilateur utilisé
 CC=g++
-CC_para=mpic++
+CC_para=mpic++ 
 
 #Chemin Eigen
 path=~/Tp\ info/2A/EigenLibrary/Eigen
@@ -27,8 +27,8 @@ $(PROG) : $(SRC)
 test : test.cc 
 	$(CC) test.cc  $(CXX_FLAGS) -o run_test
 
-CG : CG_main.cc
-	$(CC_para) CG_main.cc fonction.cpp -o run_CG
+Para : main.cc
+	$(CC_para) -std=c++11  mainPara.cc fonction.cpp Laplacian2DPara.cpp  -o run_Para
 
 
 # Supprime l'exécutable, les fichiers binaires (.o) et les fichiers
