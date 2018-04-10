@@ -60,3 +60,23 @@ class EC_ClassiqueP : public Laplacian2D //Seconde version avec une matrice qui 
     void IterativeSolver(int nb_iterations);
     void ConditionsLimites(int num_it);
 };
+
+class EC_Pyrolyse : public Laplacian2D //Schéma équation correction à matériau constant
+{
+ private:
+  double _FS, _FN, _FE, _FO;
+  double _Cp, _Lambda, _A, _Ta;
+  double _rho_v, _rho_p;
+  Eigen::VectorXd _RhoTilde; //valeur provisoire de rho
+  Eigen::VectorXd _sol_T; //solution en température
+  Eigen::VectorXd _sol_R; //solution en masse volumique
+
+ public:
+  void Initialize(DataFile datafile);
+  void SaveSol_bis(int iteration);
+  void Flux_Cal(int i, int j); //Calcul des flux Nord/Sud/Est/Ouest à lambda constant
+  void Rho_Cal_P(); //Calcul de _RhoTilde (prédiction)
+  void Rho_Cal_C(); //Calcul de _sol_R (correction)
+  void T_Cal(); //Calcul de T si Cp est CONSTANT
+  void Advance(int nb_iterations);
+};
