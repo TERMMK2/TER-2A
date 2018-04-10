@@ -47,41 +47,57 @@ int main(int argc, char** argv)
   deltaT = data_file.Get_deltaT();
   int nb_iterations = int(ceil(Tfinal/deltaT));
 
-
   Laplacian2D *Lap;
+  
 
-  int cas = 0;
-  if (data_file.Get_eq() == "EC_ClassiqueM")
-  {
-    cas = 1;
-  }
-  if (data_file.Get_eq() == "EC_ClassiqueP")
-  {
-    cas = 2;
-  }
+  Lap = new EC_Pyrolyse();
+  Lap->Initialize(data_file);
+  Lap->Advance(nb_iterations);
 
 
-  // On aurait pu faire juste avec les ifs mais bon:
-  switch(cas)
-  {
-    case 1:
-      Lap = new EC_ClassiqueM();
-      Lap->Initialize(data_file);
-      Lap->InitializeMatrix();
-      Lap->DirectSolver(nb_iterations);
-      break;
+  // int cas = 0;
+//   if (data_file.Get_eq() == "EC_ClassiqueM")
+//   {
+//     cas = 1;
+//   }
+//   if (data_file.Get_eq() == "EC_ClassiqueP")
+//   {
+//     cas = 2;
+//   }
+//   if (data_file.Get_eq() == "EC_Pyrolyse")
+//     {
+//       cas = 3;
+//     }
+  
 
-    case 2:
-      Lap = new EC_ClassiqueP();
-      Lap->Initialize(data_file);
-      Lap->InitializeMatrix();
-      Lap->DirectSolver(nb_iterations);
-      break;
 
-    default:
-      std::cout << "Ce choix n'est pas disponible" << std::endl;
-      exit(0);
-  }
+//   // On aurait pu faire juste avec les ifs mais bon:
+//   switch(cas)
+//   {
+//     case 1:
+//       Lap = new EC_ClassiqueM();
+//       Lap->Initialize(data_file);
+//       Lap->InitializeMatrix();
+//       Lap->DirectSolver(nb_iterations);
+//       break;
+
+//     case 2:
+//       Lap = new EC_ClassiqueP();
+//       Lap->Initialize(data_file);
+//       Lap->InitializeMatrix();
+//       Lap->DirectSolver(nb_iterations);
+//       break;
+
+//   case 3:
+//     Lap = new EC_Pyrolyse();
+//     Lap->Initialize(data_file);
+//     Lap->Advance(nb_iterations);
+//     break;
+
+//     default:
+//       std::cout << "Ce choix n'est pas disponible" << std::endl;
+//       exit(0);
+//   }
   return 0;
 }
 
