@@ -1,8 +1,9 @@
+#include "Datafile.h"
 #include "Laplacian2D.h"
 #include <iostream>
 #include <fstream>
 #include <chrono>
-#include "Datafile.h"
+
 
 
 using namespace Eigen;
@@ -50,54 +51,65 @@ int main(int argc, char** argv)
   Laplacian2D *Lap;
   
 
-  Lap = new EC_Pyrolyse();
+  Lap = new EC_PyrolyseMC();
   Lap->Initialize(data_file);
   Lap->Advance(nb_iterations);
 
 
-  // int cas = 0;
-//   if (data_file.Get_eq() == "EC_ClassiqueM")
-//   {
-//     cas = 1;
-//   }
-//   if (data_file.Get_eq() == "EC_ClassiqueP")
-//   {
-//     cas = 2;
-//   }
-//   if (data_file.Get_eq() == "EC_Pyrolyse")
-//     {
-//       cas = 3;
-//     }
+  if (data_file.Get_eq() == "EC_ClassiqueM")
+    {
+      Lap = new EC_ClassiqueM();
+      Lap->Initialize(data_file);
+      Lap->InitializeMatrix();
+      Lap->IterativeSolver(nb_iterations);
+    }
+  if (data_file.Get_eq() == "EC_ClassiqueP")
+     {
+       Lap = new EC_ClassiqueP();
+       Lap->Initialize(data_file);
+       Lap->InitializeMatrix();
+       auto start = chrono::high_resolution_clock::now();
+       Lap->IterativeSolver(nb_iterations);
+       auto finish = chrono::high_resolution_clock::now();
+       double t = chrono::duration_cast<chrono::microseconds>(finish-start).count();
+       cout << "Le prog a mis " << t*0.000001 << " secondes a s'effectuer" << endl;
+     }
+  if (data_file.Get_eq() == "EC_Pyrolyse")
+     {
+       Lap = new EC_PyrolyseMC();
+       Lap->Initialize(data_file);
+       Lap->Advance(nb_iterations);
+     }
   
 
 
-//   // On aurait pu faire juste avec les ifs mais bon:
-//   switch(cas)
-//   {
-//     case 1:
-//       Lap = new EC_ClassiqueM();
-//       Lap->Initialize(data_file);
-//       Lap->InitializeMatrix();
-//       Lap->DirectSolver(nb_iterations);
-//       break;
+  //   // On aurait pu faire juste avec les ifs mais bon:
+  //   switch(cas)
+  //   {
+  //     case 1:
+  //       Lap = new EC_ClassiqueM();
+  //       Lap->Initialize(data_file);
+  //       Lap->InitializeMatrix();
+  //       Lap->DirectSolver(nb_iterations);
+  //       break;
 
-//     case 2:
-//       Lap = new EC_ClassiqueP();
-//       Lap->Initialize(data_file);
-//       Lap->InitializeMatrix();
-//       Lap->DirectSolver(nb_iterations);
-//       break;
+  //     case 2:
+  //       Lap = new EC_ClassiqueP();
+  //       Lap->Initialize(data_file);
+  //       Lap->InitializeMatrix();
+  //       Lap->DirectSolver(nb_iterations);
+  //       break;
 
-//   case 3:
-//     Lap = new EC_Pyrolyse();
-//     Lap->Initialize(data_file);
-//     Lap->Advance(nb_iterations);
-//     break;
+  //   case 3:
+  //     Lap = new EC_Pyrolyse();
+  //     Lap->Initialize(data_file);
+  //     Lap->Advance(nb_iterations);
+  //     break;
 
-//     default:
-//       std::cout << "Ce choix n'est pas disponible" << std::endl;
-//       exit(0);
-//   }
+  //     default:
+  //       std::cout << "Ce choix n'est pas disponible" << std::endl;
+  //       exit(0);
+  //   }
   return 0;
 }
 
@@ -106,7 +118,7 @@ int main(int argc, char** argv)
 
 
 
-  /*
+/*
   auto start = chrono::high_resolution_clock::now();
   Lap.DirectSolver();
   auto finish = chrono::high_resolution_clock::now();
@@ -114,8 +126,6 @@ int main(int argc, char** argv)
   err = Lap.GetError();
   double t = chrono::duration_cast<chrono::microseconds>(finish-start).count();
   cout << "l'erreur pour le solveur direct est : " << err << " et il a mis "<< t << " microsecondes a s'effectuer" << endl;
-
-
   start = chrono::high_resolution_clock::now();
   Lap.IterativeSolver();
   finish = chrono::high_resolution_clock::now();
@@ -123,7 +133,4 @@ int main(int argc, char** argv)
   err = Lap.GetError();
   t = chrono::duration_cast<chrono::microseconds>(finish-start).count();
   cout << "l'erreur pour le solveur itératif est : " << err << " et il a mis "<< t << " microsecondes a s'effectuer"<< endl;
-
-
-
-  */
+*/

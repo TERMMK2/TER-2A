@@ -34,12 +34,12 @@ class Laplacian2D // pas fini de modifier
   // Constructeur : Initialiser _x_min, _x_max, _y_min; _y_max; _N; _h; _LapMat; _x; _y et _sol.
   virtual ~Laplacian2D();
 
-  virtual void Initialize(DataFile datafile)=0;
-  void InitializeMatrix();
+  virtual void Initialize(DataFile datafile);
+  virtual void InitializeMatrix()=0;
   void UpdateCL (int num_it);
-  void DirectSolver(int nb_iterations);   // Résout le système _LapMat * _sol = _f avec un solveur direct.
-  void IterativeSolver(int nb_iterations);   // Résout le système _LapMat * _sol = _f avec un solveur itératif.
-  void SaveSol(std::string name_file); // Écrit les solutions dans le fichier "name_file".
+  virtual void DirectSolver(int nb_iterations) = 0;   // Résout le système _LapMat * _sol = _f avec un solveur direct.
+  virtual void IterativeSolver(int nb_iterations) = 0;   // Résout le système _LapMat * _sol = _f avec un solveur itératif.
+  virtual void SaveSol(std::string name_file); // Écrit les solutions dans le fichier "name_file".
   void ConditionsLimites(int num_it);
   virtual void Advance(int nb_iterations)=0;
 };
@@ -51,6 +51,7 @@ class EC_ClassiqueM : public Laplacian2D //Première version avec un matrice ide
     void DirectSolver(int nb_iterations);
     void IterativeSolver(int nb_iterations);
     void ConditionsLimites(int num_it);
+    inline void Advance(int nb_iteration) {};
 };
 
 class EC_ClassiqueP : public Laplacian2D //Seconde version avec une matrice qui dépend des conditions aux bords
@@ -60,9 +61,10 @@ class EC_ClassiqueP : public Laplacian2D //Seconde version avec une matrice qui 
     void DirectSolver(int nb_iterations);
     void IterativeSolver(int nb_iterations);
     void ConditionsLimites(int num_it);
+    inline void Advance(int nb_iteration) {};
 };
 
-class EC_Pyrolyse : public Laplacian2D //Schéma équation correction à matériau constant
+class EC_PyrolyseMC : public Laplacian2D //Schéma équation correction à matériau constant
 {
  private:
   double _FS, _FN, _FE, _FO;
@@ -74,10 +76,15 @@ class EC_Pyrolyse : public Laplacian2D //Schéma équation correction à matéri
 
  public:
   void Initialize(DataFile datafile);
-  void SaveSol_bis(int iteration);
+  void SaveSol(int iteration);
   void Flux_Cal(int i, int j); //Calcul des flux Nord/Sud/Est/Ouest à lambda constant
   void Rho_Cal_P(); //Calcul de _RhoTilde (prédiction)
   void Rho_Cal_C(); //Calcul de _sol_R (correction)
   void T_Cal(); //Calcul de T si Cp est CONSTANT
   void Advance(int nb_iterations);
+
+  inline void InitializeMatrix(){};
+  inline  void DirectSolver(int nb_iterations){};
+  inline  void IterativeSolver(int nb_iterations){};
+
 };

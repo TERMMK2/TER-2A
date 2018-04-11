@@ -11,7 +11,22 @@ using namespace Eigen;
 // Constructeur
 
 DataFile::DataFile(string file_name)
-  : _file_name(file_name), _if_CL_droite(false), _if_CL_gauche(false), _if_CL_haut(false), _if_CL_bas(false),_if_Val_CL_droite(false), _if_Val_CL_gauche(false), _if_Val_CL_haut(false), _if_Val_CL_bas(false), _if_CI(false), _if_eq(false), _if_N_x(false), _if_N_y(false), _if_x_min(false), _if_x_max(false), _if_y_min(false), _if_y_max(false), _if_deltaT(false), _if_T_final(false), _if_Solveur(false), _if_Schema(false), _if_save_all_file(false), _if_save_points_file(false), _if_number_saved_points(false), _if_saved_points(false), _if_restart_file(false)
+  : _file_name(file_name), _if_CL_droite(false), _if_CL_gauche(false), _if_CL_haut(false), _if_CL_bas(false),
+    _if_Val_CL_droite(false), _if_Val_CL_gauche(false), _if_Val_CL_haut(false), _if_Val_CL_bas(false), 
+    _if_CI(false), 
+    _if_eq(false), 
+    _if_N_x(false), _if_N_y(false), 
+    _if_x_min(false), _if_x_max(false), _if_y_min(false), _if_y_max(false), 
+    _if_deltaT(false), _if_T_final(false),
+    _if_lambda(false), _if_lambdap(false), _if_lambdav(false), 
+    _if_rho(false), _if_rhop(false), _if_rhov(false),
+  _if_Cp(false), _if_Cpp(false), _if_Cpv(false),  
+  _if_Aexp(false), _if_Ta(false),
+  _if_Solveur(false), 
+  _if_Schema(false), 
+  _if_save_all_file(false), 
+  _if_save_points_file(false), _if_number_saved_points(false), _if_saved_points(false),
+  _if_restart_file(false) 
 {}
 
 
@@ -41,6 +56,7 @@ void DataFile::ReadDataFile()
   while (!data_file.eof())
     {
       getline(data_file, file_line);
+      //cout << file_line <<endl;
       if (file_line.find("CL droite") != std::string::npos)
 	{
 	  data_file >> _CL_droite; _if_CL_droite = true;
@@ -167,19 +183,60 @@ void DataFile::ReadDataFile()
 	  data_file >> _T_final; _if_T_final = true;
 	}
 
-      if (file_line.find("lambda") != std::string::npos)
+      if (file_line.find("lambda ") != std::string::npos)
 	{
 	  data_file >> _lambda; _if_lambda = true;
 	}
 
-      if (file_line.find("rho") != std::string::npos)
+      if (file_line.find("lambdap") != std::string::npos)
+	{
+	  data_file >> _lambdap; _if_lambdap = true;
+	}
+
+      if (file_line.find("lambdav") != std::string::npos)
+	{
+	  data_file >> _lambdav; _if_lambdav = true;
+	}
+
+      if (file_line.find("rho ") != std::string::npos)
 	{
 	  data_file >> _rho; _if_rho = true;
 	}
 
-      if (file_line.find("Cp") != std::string::npos)
+      if (file_line.find("rhop") != std::string::npos)
+	{
+	  data_file >> _rhop; _if_rhop = true;
+	}
+
+      if (file_line.find("rhov") != std::string::npos)
+	{
+	  data_file >> _rhov; _if_rhov = true;
+	}
+
+      if (file_line.find("Cp ") != std::string::npos)
 	{
 	  data_file >> _Cp; _if_Cp = true;
+	}
+
+      if (file_line.find("Cpp") != std::string::npos)
+	{
+	  data_file >> _Cpp; _if_Cpp = true;
+	}
+
+      if (file_line.find("Cpv") != std::string::npos)
+	{
+	  data_file >> _Cpv; _if_Cpv = true;
+	}
+
+
+      if (file_line.find("A exp") != std::string::npos)
+	{
+	  data_file >> _Aexp; _if_Aexp = true;
+	}
+
+      if (file_line.find("Ta") != std::string::npos)
+	{
+	  data_file >> _Ta; _if_Ta = true;
 	}
 
       
@@ -245,8 +302,6 @@ void DataFile::ReadDataFile()
 
     }
   
-
-
 
   // Initialisation par défaut des paramètres non fixés dans le fichier
   // Un message prévient l'utilisateur
@@ -348,7 +403,7 @@ void DataFile::ReadDataFile()
       _CI = 293;      
     }
 
-  if ((!_if_eq) or ((_eq != "EC_ClassiqueM") and (_eq != "EC_ClassiqueP")))
+  if ((!_if_eq) or ((_eq != "EC_ClassiqueM") and (_eq != "EC_ClassiqueP") and (_eq != "EC_PyrolyseMC")))
     {
       cout << "---------------------------------------------------" << endl;
       cout << "Attention, vous n'avez pas entré d'équation ou celle que vous avez choisie n'existe pas." <<endl;
@@ -407,26 +462,68 @@ void DataFile::ReadDataFile()
       _T_final = 10;
     }
 
-  if (!_if_lambda)
+  //----------------------------------------------------------------------
+  //Rajouter plus tard les trucs par défaut pour pour la pyrolyse avec lambda variable et Cp variable pour lambda, rho et Cp
+  //Rajouter aussi les valeurs par défault pour lambdap, lambdav, Cpp et Cpv.
+  //A faire avant de faire marcher le code 
+  //----------------------------------------------------------------------
+
+
+  if ((!_if_lambda) and (((_eq =="EC_ClassiqueM") or (_eq =="EC_ClassiqueP")) or (_eq =="EC_PyrolyseMC")))
     {
       cout << "---------------------------------------------------" << endl;
       cout << "Attention, le lambda par défaut est utilisé (1.).-" << endl;
       _lambda = 1.;
     }
 
-  if (!_if_rho)
+
+  if ((!_if_rhop) and (_eq =="EC_PyrolyseMC"))//truc à faire pour la pyro plus compliquée
+    {
+      cout << "---------------------------------------------------" << endl;
+      cout << "Attention, le rhop par défaut est utilisé (1000.).-" << endl;
+      _rhop = 1000.;
+    }
+
+  if ((!_if_rhov) and (_eq =="EC_PyrolyseMC"))//truc à faire pour la pyro plus compliquée
+    {
+      cout << "---------------------------------------------------" << endl;
+      cout << "Attention, le rhop par défaut est utilisé (1500.).-" << endl;
+      _rhov = 1500.;
+    }
+
+
+
+  if ((!_if_rho) and ((_eq =="EC_ClassiqueM")or(_eq =="EC_ClassiqueP")))
     {
       cout << "---------------------------------------------------" << endl;
       cout << "Attention, le rho par défaut est utilisé (1000.).-" << endl;
       _rho = 1000.;
     }
 
-  if (!_if_Cp)
+
+  if ((!_if_Cp)and (((_eq =="EC_ClassiqueM") or (_eq =="EC_ClassiqueP")) or (_eq =="EC_PyrolyseMC")))
     {
       cout << "---------------------------------------------------" << endl;
       cout << "Attention, le Cp par défaut est utilisé (1500.).-" << endl;
       _Cp = 1500.;
     }
+
+  
+  if ((!_if_Aexp) and (_eq == "EC_PyrolyseMC"))
+    {
+      cout << "---------------------------------------------------" << endl;
+      cout << "Attention, le facteur préexponentiel par défaut est utilisé (1000.).-" << endl;
+      _Aexp = 1000.;
+    }
+  
+  if ((!_if_Ta) and (_eq == "EC_PyrolyseMC"))
+    {
+      cout << "---------------------------------------------------" << endl;
+      cout << "Attention, la température d'activation par défaut est utilisé (6000.).-" << endl;
+      _Ta = 1000.;
+    }
+
+
   
   if (!_if_Solveur)
     {

@@ -34,8 +34,19 @@ class DataFile
   double _T_final;
 
   double _lambda;
+  double _lambdav;
+  double _lambdap;
+
   double _rho;
+  double _rhov;
+  double _rhop;  
+
   double _Cp;
+  double _Cpp;
+  double _Cpv;
+
+  double _Aexp;
+  double _Ta;
 
   std::string _Solveur;
   std::string _Schema; // A voir si vraiment utile !
@@ -71,8 +82,19 @@ class DataFile
   bool _if_T_final;
   
   bool _if_lambda;
+  bool _if_lambdap;
+  bool _if_lambdav;
+
   bool _if_rho;
+  bool _if_rhop;
+  bool _if_rhov;
+
   bool _if_Cp;
+  bool _if_Cpp;
+  bool _if_Cpv;
+
+  bool _if_Aexp;
+  bool _if_Ta;
 
   bool _if_Solveur;
   bool _if_Schema; // a voir si utile ou pas pas fait ça et la suite
@@ -115,8 +137,19 @@ class DataFile
   inline double Get_T_final() {return _T_final;}
   
   inline double Get_lambda() {return _lambda;}
+  inline double Get_lambdap() {return _lambdap;}
+  inline double Get_lambdav() {return _lambdav;}
+
   inline double Get_rho() {return _rho;}
+  inline double Get_rhop() {return _rhop;}
+  inline double Get_rhov() {return _rhov;}
+
   inline double Get_Cp() {return _Cp;}
+  inline double Get_Cpp() {return _Cpp;}
+  inline double Get_Cpv() {return _Cpv;}
+
+  inline double Get_Aexp() {return _Aexp;}
+  inline double Get_Ta() {return _Ta;}
 
   inline std::string Get_Solveur() {return _Solveur;}
   inline std::string Get_Schema() {return _Schema;}
