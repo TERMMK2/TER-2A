@@ -57,7 +57,7 @@ void DataFile::ReadDataFile()
     {
       getline(data_file, file_line);
       //cout << file_line <<endl;
-      if (file_line.find("CL droite") != std::string::npos)
+      if (file_line.find("CL droite :") != std::string::npos)
 	{
 	  data_file >> _CL_droite; _if_CL_droite = true;
 	  data_file >> truc;
@@ -79,7 +79,7 @@ void DataFile::ReadDataFile()
 	}
 
 
-      if (file_line.find("CL gauche") != std::string::npos)
+      if (file_line.find("CL gauche :") != std::string::npos)
 	{ 
 	  data_file >> _CL_gauche; _if_CL_gauche = true;
 	  if (_CL_gauche != "Neumann_non_constant")
@@ -101,7 +101,7 @@ void DataFile::ReadDataFile()
 	}
 
 
-      if (file_line.find("CL haut") != std::string::npos)
+      if (file_line.find("CL haut :") != std::string::npos)
 	{
 	  data_file >> _CL_haut; _if_CL_haut = true;
 	  data_file >> truc;
@@ -120,7 +120,7 @@ void DataFile::ReadDataFile()
 	}
 
 
-      if (file_line.find("CL bas") != std::string::npos)
+      if (file_line.find("CL bas :") != std::string::npos)
 	{
 	  data_file >> _CL_bas; _if_CL_bas = true;
 	  data_file >> truc;
@@ -139,66 +139,66 @@ void DataFile::ReadDataFile()
 	}
 
       
-      if (file_line.find("CI") != std::string::npos)
+      if (file_line.find("CI :") != std::string::npos)
 	{
 	  data_file >> _CI; _if_CI = true;
 	}
       
-      if (file_line.find("Equation") != std::string::npos)
+      if (file_line.find("Equation :") != std::string::npos)
       	{
       	  data_file >> _eq; _if_eq = true;
       	}
       
 
-      if (file_line.find("N_x") != std::string::npos)
+      if (file_line.find("N_x :") != std::string::npos)
 	{
 	  data_file >> _N_x; _if_N_x = true;
 	}
-      if (file_line.find("N_y") != std::string::npos)
+      if (file_line.find("N_y :") != std::string::npos)
 	{
 	  data_file >> _N_y; _if_N_y = true;
 	}
-      if (file_line.find("x_min") != std::string::npos)
+      if (file_line.find("x_min :") != std::string::npos)
 	{
 	  data_file >> _x_min; _if_x_min = true;
 	}
-      if (file_line.find("x_max") != std::string::npos)
+      if (file_line.find("x_max :") != std::string::npos)
 	{
 	  data_file >> _x_max; _if_x_max = true;
 	}
-      if (file_line.find("y_min") != std::string::npos)
+      if (file_line.find("y_min :") != std::string::npos)
 	{
 	  data_file >> _y_min; _if_y_min = true;
 	}
-      if (file_line.find("y_max") != std::string::npos)
+      if (file_line.find("y_max :") != std::string::npos)
 	{
 	  data_file >> _y_max; _if_y_max = true;
 	}
-      if (file_line.find("delta t") != std::string::npos)
+      if (file_line.find("delta t :") != std::string::npos)
 	{
 	  data_file >> _deltaT; _if_deltaT = true;
 	}
-      if (file_line.find("T final") != std::string::npos)
+      if (file_line.find("T final :") != std::string::npos)
 	{
 	  data_file >> _T_final; _if_T_final = true;
 	}
 
-      if (file_line.find("lambda ") != std::string::npos)
+      if (file_line.find("lambda :") != std::string::npos)
 	{
 	  data_file >> _lambda; _if_lambda = true;
 	}
 
-      if (file_line.find("lambdap") != std::string::npos)
+      if (file_line.find("lambdap :") != std::string::npos)
 	{
 	  data_file >> _lambdap; _if_lambdap = true;
 	}
 
-      if (file_line.find("lambdav") != std::string::npos)
+      if (file_line.find("lambdav :") != std::string::npos)
 	{
 	  data_file >> _lambdav; _if_lambdav = true;
 	}
 
-      if (file_line.find("rho ") != std::string::npos)
+      if (file_line.find("rho :") != std::string::npos)
 	{
 	  data_file >> _rho; _if_rho = true;
 	}
@@ -208,65 +208,65 @@ void DataFile::ReadDataFile()
 	  data_file >> _rhop; _if_rhop = true;
 	}
 
-      if (file_line.find("rhov") != std::string::npos)
+      if (file_line.find("rhov :") != std::string::npos)
 	{
 	  data_file >> _rhov; _if_rhov = true;
 	}
 
-      if (file_line.find("Cp ") != std::string::npos)
+      if (file_line.find("Cp :") != std::string::npos)
 	{
 	  data_file >> _Cp; _if_Cp = true;
 	}
 
-      if (file_line.find("Cpp") != std::string::npos)
+      if (file_line.find("Cpp :") != std::string::npos)
 	{
 	  data_file >> _Cpp; _if_Cpp = true;
 	}
 
-      if (file_line.find("Cpv") != std::string::npos)
+      if (file_line.find("Cpv :") != std::string::npos)
 	{
 	  data_file >> _Cpv; _if_Cpv = true;
 	}
 
 
-      if (file_line.find("A exp") != std::string::npos)
+      if (file_line.find("A exp :") != std::string::npos)
 	{
 	  data_file >> _Aexp; _if_Aexp = true;
 	}
 
-      if (file_line.find("Ta") != std::string::npos)
+      if (file_line.find("Ta :") != std::string::npos)
 	{
 	  data_file >> _Ta; _if_Ta = true;
 	}
 
       
-      if (file_line.find("Solveur") != std::string::npos)
+      if (file_line.find("Solveur :") != std::string::npos)
 	{
 	  data_file >> _Solveur; _if_Solveur = true;
 	}
-      if (file_line.find("Schema") != std::string::npos)
+      if (file_line.find("Schema :") != std::string::npos)
 	{
 	  data_file >> _Schema; _if_Schema = true;
 	}
       
 
-      if (file_line.find("Fichier Paraview") != std::string::npos)
+      if (file_line.find("Fichier Paraview :") != std::string::npos)
 	{
 	  data_file >> _save_all_file; _if_save_all_file = true;
 	}
       
-      if (file_line.find("Fichier sauvegarde points") != std::string::npos)
+      if (file_line.find("Fichier sauvegarde points :") != std::string::npos)
 	{
 	  data_file >> _save_points_file; _if_save_points_file = true;
 	}
-      if (file_line.find("Nombre de points à sauver") != std::string::npos)
+      if (file_line.find("Nombre de points à sauver :") != std::string::npos)
 	{
 	  data_file >> _number_saved_points; _if_number_saved_points = true;
 	  _saved_points.resize(_number_saved_points);
 	  for (int i = 0 ; i<_number_saved_points; i++) 
 	    { _saved_points[i].resize(2);  }
 	}
-      if (file_line.find("Points à sauver") != std::string::npos)
+      if (file_line.find("Points à sauver :") != std::string::npos)
 	{
 	  int i =0;
 	  bool test = true;
@@ -294,7 +294,7 @@ void DataFile::ReadDataFile()
 	    _if_saved_points = true;
 	}  
 
-      if(file_line.find("Fichier de redemarrage") != std::string::npos)
+      if(file_line.find("Fichier de redemarrage :") != std::string::npos)
 	{
 	  data_file >> _restart_file; _if_restart_file = true;
 	}

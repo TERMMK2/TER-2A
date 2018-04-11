@@ -17,10 +17,10 @@ Equation :
 EC_ClassiqueP
 
 N_x :
-200
+500
 
 N_y :
-3
+50
 
 x_min :
 0
@@ -35,7 +35,7 @@ y_max :
 0.005
 
 delta t :
-0.01
+1
 
 T final :
 100

@@ -51,9 +51,9 @@ int main(int argc, char** argv)
   Laplacian2D *Lap;
   
 
-  Lap = new EC_PyrolyseMC();
-  Lap->Initialize(data_file);
-  Lap->Advance(nb_iterations);
+  // Lap = new EC_PyrolyseMC();
+  // Lap->Initialize(data_file);
+  // Lap->Advance(nb_iterations);
 
 
   if (data_file.Get_eq() == "EC_ClassiqueM")
@@ -68,6 +68,7 @@ int main(int argc, char** argv)
        Lap = new EC_ClassiqueP();
        Lap->Initialize(data_file);
        Lap->InitializeMatrix();
+       cout<<"bonjour"<<endl;
        auto start = chrono::high_resolution_clock::now();
        Lap->IterativeSolver(nb_iterations);
        auto finish = chrono::high_resolution_clock::now();
