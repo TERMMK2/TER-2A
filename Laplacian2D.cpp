@@ -976,7 +976,7 @@ void EC_PyrolyseMC::Advance(int nb_iterations)
 	  EC_PyrolyseMC::SaveSol(i);
 	}
 
-      // if (_save_points_file != "non")
+      if (_save_points_file != "non")
       	{
       	  char* truc = new char;
       	  for (int j=0; j<_number_saved_points; j++)

@@ -83,33 +83,7 @@ int main(int argc, char** argv)
   
 
 
-  //   // On aurait pu faire juste avec les ifs mais bon:
-  //   switch(cas)
-  //   {
-  //     case 1:
-  //       Lap = new EC_ClassiqueM();
-  //       Lap->Initialize(data_file);
-  //       Lap->InitializeMatrix();
-  //       Lap->DirectSolver(nb_iterations);
-  //       break;
-
-  //     case 2:
-  //       Lap = new EC_ClassiqueP();
-  //       Lap->Initialize(data_file);
-  //       Lap->InitializeMatrix();
-  //       Lap->DirectSolver(nb_iterations);
-  //       break;
-
-  //   case 3:
-  //     Lap = new EC_Pyrolyse();
-  //     Lap->Initialize(data_file);
-  //     Lap->Advance(nb_iterations);
-  //     break;
-
-  //     default:
-  //       std::cout << "Ce choix n'est pas disponible" << std::endl;
-  //       exit(0);
-  //   }
+  
   return 0;
 }
 

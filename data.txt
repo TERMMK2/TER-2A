@@ -14,10 +14,10 @@ CI :
 290
 
 Equation :
-EC_ClassiqueP
+EC_PyrolyseMC
 
 N_x :
-50
+200
 
 N_y :
 5
@@ -35,7 +35,7 @@ y_max :
 0.005
 
 delta t :
-1
+0.08
 
 T final :
 100
@@ -72,7 +72,7 @@ Fichier Paraview :
 sol_1
 
 Fichier sauvegarde points :
-sol_pts_1
+non
 
 Nombre de points à sauver :
 5
