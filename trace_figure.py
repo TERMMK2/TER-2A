@@ -13,6 +13,8 @@ v = loadtxt ('sol_pts_1/point_1')
 w = loadtxt ('sol_pts_1/point_2')
 x = loadtxt ('sol_pts_1/point_3')
 y = loadtxt ('sol_pts_1/point_4')
+z = loadtxt ('resultats/sans_pyrolyse/temp_thermo_couple')
+
 
 # plot (u[:,0],u[:,1], label = r'$x(t)$ Eul\_exp')
 # plot (v[:,0],v[:,1], label = r'$x(t)$ RK3')
@@ -25,6 +27,11 @@ plot (w[:,0],w[:,1],"b", label = r'$T(t)$ \`a 2 mm')
 plot (x[:,0],x[:,1],"g", label = r'$T(t)$ \`a 3 mm')
 plot (y[:,0],y[:,1],"c", label = r'$T(t)$ \`a 4 mm')
 
+plot (z[:,0],z[:,1],"k--", label = r'$T(t)$ \`a la paroi prof')
+plot (z[:,0],z[:,2],"r--", label = r'$T(t)$ \`a 1 mm prof')
+plot (z[:,0],z[:,3],"b--", label = r'$T(t)$ \`a 2 mm prof')
+plot (z[:,0],z[:,4],"g--", label = r'$T(t)$ \`a 3 mm prof')
+plot (z[:,0],z[:,5],"c--", label = r'$T(t)$ \`a 4 mm prof')
 
 # plot (u[:,0],u[:,2],"r--", label = r"$\Theta'(t)$ Eul\_exp")
 # plot (v[:,0],v[:,2],"b--", label = r"$\Theta'(t)$ RK3")
@@ -49,8 +56,7 @@ xlabel ('t')
 ylabel (r'$\Theta$')
 
 
-title (r"\'Evolution de la temp\'erature dans une plaque chauff\'ee en un bord \`a la paroi ainsi  qu\`a 1mm, 2mm, 3mm et 4mm") 
+title (r"\'Evolution de la temp\'erature dans une plaque chauff\'ee en un bord \`a la paroi ainsi  qu\`a 1mm, 2mm, 3mm et 4mm")
 
 legend (loc=0)
 show()
-
