@@ -2,7 +2,7 @@ CL droite :
 Neumann 0
 
 CL gauche :
-Neumann_non_constant 2900
+Dirichlet 5000
 
 CL haut :
 Neumann 0
@@ -17,10 +17,10 @@ Equation :
 EC_PyrolyseMC
 
 N_x :
-200
+500
 
 N_y :
-5
+2
 
 x_min :
 0
@@ -35,16 +35,13 @@ y_max :
 0.005
 
 delta t :
-0.08
+0.1
 
 T final :
 100
 
 lambda :
 1.
-
-rho :
-1000
 
 rhop :
 1000.
@@ -56,7 +53,7 @@ A exp :
 1000.
 
 Ta :
-1000.
+6000.
 
 Cp :
 1500.

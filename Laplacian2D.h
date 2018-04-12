@@ -3,7 +3,7 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
-#include <string> 
+#include <string>
 #include <algorithm>
 #include <memory>
 #include "Datafile.h"
@@ -15,18 +15,19 @@ class Laplacian2D // pas fini de modifier
   double _x_min, _x_max, _y_min, _y_max, _h_x, _h_y, _a, _deltaT;
   int _Nx, _Ny;
   Eigen::SparseMatrix<double> _LapMat; // matrice creuse du laplacien
+  Eigen::VectorXd _x, _y; // points de discretisation x et y
   Eigen::VectorXd _f; // vecteur source _f qui prend les données de _sol(i) pour calculer _sol(i+1)
   Eigen::VectorXd _sol; // vecteur solution U
   std::string _CL_bas, _CL_haut, _CL_gauche, _CL_droite;
   double _Val_CL_bas, _Val_CL_haut, _Val_CL_gauche, _Val_CL_droite;
 
   std::string _Solveur;
-  
+
   std::string _save_all_file, _save_points_file, _restart_file;
   int _number_saved_points;
-  std::vector<std::vector<double>> _saved_points; 
+  std::vector<std::vector<double>> _saved_points;
 
-  
+
 
   public: // Méthodes et opérateurs de la classe
   Laplacian2D();
@@ -74,15 +75,17 @@ class EC_PyrolyseMC : public Laplacian2D //Schéma équation correction à maté
 
  public:
   void Initialize(DataFile datafile);
+  void InitializeMatrix();
   void SaveSol(int iteration);
   void Flux_Cal(int i, int j); //Calcul des flux Nord/Sud/Est/Ouest à lambda constant
   void Rho_Cal_P(); //Calcul de _RhoTilde (prédiction)
   void Rho_Cal_C(); //Calcul de _sol_R (correction)
   void T_Cal(); //Calcul de T si Cp est CONSTANT
   void Advance(int nb_iterations);
+  void AdvanceMatrix(int i, int j);
+  void IterativeSolver(int nb_iterations);
+  void ConditionsLimites(int num_it);
 
-  inline void InitializeMatrix(){};
-  inline  void DirectSolver(int nb_iterations){};
-  inline  void IterativeSolver(int nb_iterations){};
+  inline void DirectSolver(int nb_iterations){};
 
 };

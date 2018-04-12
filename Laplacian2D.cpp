@@ -8,7 +8,7 @@ using namespace std ;
 
 
 //Constructeur :
-Laplacian2D::Laplacian2D() 
+Laplacian2D::Laplacian2D()
 {}
 //Destructeur :
 Laplacian2D::~Laplacian2D()
@@ -24,7 +24,7 @@ void Laplacian2D::Initialize(DataFile data_file)
   _Val_CL_gauche = data_file.Get_Val_CL_gauche();
   _Val_CL_haut = data_file.Get_Val_CL_haut();
   _Val_CL_bas = data_file.Get_Val_CL_bas();
-  
+
   _Nx = data_file.Get_N_x();
   _Ny = data_file.Get_N_y();
   _x_min = data_file.Get_x_min();
@@ -49,7 +49,7 @@ void Laplacian2D::Initialize(DataFile data_file)
   _h_y = (_y_max-_y_min)/(_Ny+1.);
   _h_x = (_x_max-_x_min)/(_Nx+1.);
 
-  
+
   //-----------Def de la CI--------------
   if (_restart_file == "non")
     {
@@ -66,7 +66,7 @@ void Laplacian2D::Initialize(DataFile data_file)
 	{
 	  _a = data_file.Get_lambda()/(data_file.Get_rho()*data_file.Get_Cp());
 	}
-      
+
 
     }
   else
@@ -110,7 +110,18 @@ void Laplacian2D::UpdateCL(int num_it)
 
 void Laplacian2D::InitializeMatrix()
 {
-  
+  _x.resize(_Nx);
+  _y.resize(_Ny);
+  for (int j =0; j < _Nx ; j++)
+  {
+    _x(j) = _x_min + j*_h_x;
+  }
+
+  for (int i = 0; i < _Ny ; i++)
+  {
+    _y(i) = _y_min + i*_h_y;
+  }
+
   _LapMat.resize(_Nx*_Ny,_Nx*_Ny);
 
   double alpha = 1 + 2*_a*_deltaT/(_h_x*_h_x) + 2*_a*_deltaT/(_h_y*_h_y);
@@ -143,11 +154,11 @@ void Laplacian2D::InitializeMatrix()
 
 void EC_ClassiqueP::InitializeMatrix()
 {
+
   Laplacian2D::InitializeMatrix();
 
   double beta = -_a*_deltaT/(_h_x*_h_x);
   double gamma = -_a*_deltaT/(_h_y*_h_y);
-
 
  if (_CL_gauche == "Neumann" or _CL_gauche == "Neumann_non_constant")
   {
@@ -189,14 +200,14 @@ void EC_ClassiqueM::DirectSolver (int nb_iterations) //il reste un petit truc à
 {
   SimplicialLLT <SparseMatrix<double> > solver;
   solver.compute(_LapMat);
-  
+
   vector< shared_ptr<ofstream> > mes_flux;
-  
+
   if(_save_points_file != "non")
     {
       //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
       for (int i=0; i<_number_saved_points; i++)
-	{ 
+	{
 	  shared_ptr<ofstream> flux(new ofstream);
 	  flux->open(_save_points_file+"/point_"+to_string(i), ios::out);
 	  mes_flux.push_back(flux);
@@ -211,8 +222,8 @@ void EC_ClassiqueM::DirectSolver (int nb_iterations) //il reste un petit truc à
 	{
 	  EC_ClassiqueM::SaveSol(_save_all_file+"/sol_it_"+to_string(i)+".vtk");
 	}
-      
-      
+
+
       if (_save_points_file != "non")
 	{
 	  char* truc = new char;
@@ -226,7 +237,7 @@ void EC_ClassiqueM::DirectSolver (int nb_iterations) //il reste un petit truc à
 	      mes_flux[j]->write(truc,16);
 	      mes_flux[j]->write("\n",1);
 	      //Bon alors je vais expliquer un peu le bordel que c'est :
-	      //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement 
+	      //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement
 	      //Et à cause de ça je peux pas faire << comme d'hab
 	      //Donc j'utilise write (qui marche avec les pointeurs mais qui est plus chiant à utiliser) et c'est pour ça que c'est dégueu
 	      //Mais en gros ça marche comme ça (d'après ce que j'ai pigé) :
@@ -245,16 +256,16 @@ void EC_ClassiqueM::DirectSolver (int nb_iterations) //il reste un petit truc à
       _sol = solver.solve(_f);
     }
 
-  
+
   if(_save_points_file != "non")
     {
       //On referme les flux qu'on a ouvert
       for (int i=0; i<_number_saved_points; i++)
-	{ 
+	{
 	  mes_flux[i]->close();
 	}
     }
-  
+
 
 }
 
@@ -262,14 +273,14 @@ void EC_ClassiqueP::DirectSolver (int nb_iterations)
 {
   SimplicialLLT <SparseMatrix<double> > solver;
   solver.compute(_LapMat);
-  
+
   vector< shared_ptr<ofstream> > mes_flux;
-  
+
   if(_save_points_file != "non")
     {
       //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
       for (int i=0; i<_number_saved_points; i++)
-	{ 
+	{
 	  shared_ptr<ofstream> flux(new ofstream);
 	  flux->open(_save_points_file+"/point_"+to_string(i), ios::out);
 	  mes_flux.push_back(flux);
@@ -284,8 +295,8 @@ void EC_ClassiqueP::DirectSolver (int nb_iterations)
 	{
 	  EC_ClassiqueP::SaveSol(_save_all_file+"/sol_it_"+to_string(i)+".vtk");
 	}
-      
-      
+
+
       // if (_save_points_file != "non")
       // 	{
       // 	  char* truc = new char;
@@ -299,7 +310,7 @@ void EC_ClassiqueP::DirectSolver (int nb_iterations)
       // 	      mes_flux[j]->write(truc,16);
       // 	      mes_flux[j]->write("\n",1);
       // 	      //Bon alors je vais expliquer un peu le bordel que c'est :
-      // 	      //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement 
+      // 	      //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement
       // 	      //Et à cause de ça je peux pas faire << comme d'hab
       // 	      //Donc j'utilise write (qui marche avec les pointeurs mais qui est plus chiant à utiliser) et c'est pour ça que c'est dégueu
       // 	      //Mais en gros ça marche comme ça (d'après ce que j'ai pigé) :
@@ -318,12 +329,12 @@ void EC_ClassiqueP::DirectSolver (int nb_iterations)
       _sol = solver.solve(_f);
     }
 
-  
+
   if(_save_points_file != "non")
     {
       //On referme les flux qu'on a ouvert
       for (int i=0; i<_number_saved_points; i++)
-	{ 
+	{
 	  mes_flux[i]->close();
 	}
     }
@@ -335,14 +346,14 @@ void EC_ClassiqueM::IterativeSolver (int nb_iterations)
 {
   ConjugateGradient <SparseMatrix<double> > solver;
   solver.compute(_LapMat);
-  
+
   vector< shared_ptr<ofstream> > mes_flux;
-  
+
   if(_save_points_file != "non")
     {
       //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
       for (int i=0; i<_number_saved_points; i++)
-	{ 
+	{
 	  shared_ptr<ofstream> flux(new ofstream);
 	  flux->open(_save_points_file+"/point_"+to_string(i), ios::out);
 	  mes_flux.push_back(flux);
@@ -357,8 +368,8 @@ void EC_ClassiqueM::IterativeSolver (int nb_iterations)
 	{
 	  EC_ClassiqueM::SaveSol(_save_all_file+"/sol_it_"+to_string(i)+".vtk");
 	}
-      
-      
+
+
       if (_save_points_file != "non")
 	{
 	  char* truc = new char;
@@ -372,7 +383,7 @@ void EC_ClassiqueM::IterativeSolver (int nb_iterations)
 	      mes_flux[j]->write(truc,16);
 	      mes_flux[j]->write("\n",1);
 	      //Bon alors je vais expliquer un peu le bordel que c'est :
-	      //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement 
+	      //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement
 	      //Et à cause de ça je peux pas faire << comme d'hab
 	      //Donc j'utilise write (qui marche avec les pointeurs mais qui est plus chiant à utiliser) et c'est pour ça que c'est dégueu
 	      //Mais en gros ça marche comme ça (d'après ce que j'ai pigé) :
@@ -391,12 +402,12 @@ void EC_ClassiqueM::IterativeSolver (int nb_iterations)
       _sol = solver.solve(_f);
     }
 
-  
+
   if(_save_points_file != "non")
     {
       //On referme les flux qu'on a ouvert
       for (int i=0; i<_number_saved_points; i++)
-	{ 
+	{
 	  mes_flux[i]->close();
 	}
     }
@@ -407,14 +418,14 @@ void EC_ClassiqueP::IterativeSolver (int nb_iterations)
 {
   ConjugateGradient <SparseMatrix<double> > solver;
   solver.compute(_LapMat);
-  
+
   vector< shared_ptr<ofstream> > mes_flux;
-  
+
   if(_save_points_file != "non")
     {
       //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
       for (int i=0; i<_number_saved_points; i++)
-	{ 
+	{
 	  shared_ptr<ofstream> flux(new ofstream);
 	  flux->open(_save_points_file+"/point_"+to_string(i), ios::out);
 	  mes_flux.push_back(flux);
@@ -429,8 +440,8 @@ void EC_ClassiqueP::IterativeSolver (int nb_iterations)
 	{
 	  EC_ClassiqueP::SaveSol(_save_all_file+"/sol_it_"+to_string(i)+".vtk");
 	}
-      
-      
+
+
       if (_save_points_file != "non")
 	{
 	  char* truc = new char;
@@ -444,7 +455,7 @@ void EC_ClassiqueP::IterativeSolver (int nb_iterations)
 	      mes_flux[j]->write(truc,16);
 	      mes_flux[j]->write("\n",1);
 	      //Bon alors je vais expliquer un peu le bordel que c'est :
-	      //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement 
+	      //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement
 	      //Et à cause de ça je peux pas faire << comme d'hab
 	      //Donc j'utilise write (qui marche avec les pointeurs mais qui est plus chiant à utiliser) et c'est pour ça que c'est dégueu
 	      //Mais en gros ça marche comme ça (d'après ce que j'ai pigé) :
@@ -461,27 +472,14 @@ void EC_ClassiqueP::IterativeSolver (int nb_iterations)
           _f(j) = _sol(j);
         }
       _sol = solver.solve(_f);
-
-      //Barre de chargement
-      int i_barre;
-      int p = floor((((double)i)/((double)nb_iterations))*100);
-      printf( "[" );
-      for(i_barre=0;i_barre<=p;i_barre+=2) printf( "*" );
-      for (;i_barre<100; i_barre+=2 ) printf( "-" );
-      printf( "] %3d %%", p );
-
-      for(i_barre=0;i_barre<59;++i_barre) printf( "%c", 8 );
-
-      fflush(stdout );
     }
 
-  printf("\n");
 
   if(_save_points_file != "non")
     {
       //On referme les flux qu'on a ouvert
       for (int i=0; i<_number_saved_points; i++)
-	{ 
+	{
 	  mes_flux[i]->close();
 	}
     }
@@ -494,7 +492,7 @@ void EC_ClassiqueP::IterativeSolver (int nb_iterations)
 void Laplacian2D::SaveSol(string name_file)
 {
 
-  
+
   ofstream mon_flux;
   mon_flux.open(name_file, ios::out);
   mon_flux << "# vtk DataFile Version 3.0" << endl
@@ -515,7 +513,7 @@ void Laplacian2D::SaveSol(string name_file)
 	{
 	  mon_flux << _sol(j + i*_Nx) << " ";
 	  //mon_flux.write("bonjour",7);
-	  
+
 	}
       mon_flux << endl;
     }
@@ -688,6 +686,9 @@ void EC_ClassiqueP::ConditionsLimites(int num_it)
   }
 }
 
+//-----------------------------------------------------------------------------
+
+
 void EC_PyrolyseMC::Initialize(DataFile data_file)
 {
   Laplacian2D::Initialize(data_file);
@@ -696,10 +697,11 @@ void EC_PyrolyseMC::Initialize(DataFile data_file)
 
   _rho_v = data_file.Get_rhov(); //1500.
   _rho_p = data_file.Get_rhop();//1000.
-  _Cp = data_file.Get_Cp();
+  _Cp = data_file.Get_Cp();//1500
   _Lambda = data_file.Get_lambda();
   _A = data_file.Get_Aexp();//1000.
   _Ta = data_file.Get_Ta();//6000.
+
 
 
   _sol_T.resize(_Nx*_Ny);
@@ -719,6 +721,98 @@ void EC_PyrolyseMC::Initialize(DataFile data_file)
   cout << "cfl :" << _Lambda*_deltaT/(_rho_v*_Cp)*(1/(_h_x*_h_x) + 1/(_h_y*_h_y)) << endl;
 
 
+}
+
+void EC_PyrolyseMC::InitializeMatrix()
+{
+  _x.resize(_Nx);
+  _y.resize(_Ny);
+  for (int j =0; j < _Nx ; j++)
+  {
+    _x(j) = _x_min + j*_h_x;
+  }
+
+  for (int i = 0; i < _Ny ; i++)
+  {
+    _y(i) = _y_min + i*_h_y;
+  }
+
+  _LapMat.resize(_Nx*_Ny,_Nx*_Ny);
+
+  Eigen::VectorXd alpha;
+  Eigen::VectorXd beta;
+  Eigen::VectorXd gamma;
+
+  alpha.resize(_Nx*_Ny);
+  beta.resize(_Nx*_Ny);
+  gamma.resize(_Nx*_Ny);
+
+
+
+  for (int i=0;i<_Nx*_Ny;i++)
+    {
+      alpha[i] = 1 + 2*(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_x*_h_x) + 2*(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_y*_h_y);
+      beta[i] = -(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_x*_h_x);
+      gamma[i] = -(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_y*_h_y);
+    }
+
+
+  vector<Triplet<double>> liste_elem;
+
+  for (int i = 0 ; i<_Nx*_Ny ; i++)
+  {
+    liste_elem.push_back({i,i,alpha[i]});
+  }
+
+  for (int i = 0 ; i<_Ny*_Nx-1; i++)
+  {
+    if ((i+1)%_Nx!=0)
+    {
+      liste_elem.push_back({i,i+1,beta[i]});
+      liste_elem.push_back({i+1,i,beta[i]});
+    }
+  }
+  for (int i = 0 ; i<_Nx*(_Ny-1) ; i++)
+  {
+    liste_elem.push_back({i,_Nx+i,gamma[i]});
+    liste_elem.push_back({_Nx+i,i,gamma[i]});
+  }
+
+  _LapMat.setFromTriplets(liste_elem.begin(), liste_elem.end());
+
+
+  if (_CL_gauche == "Neumann" or _CL_gauche == "Neumann_non_constant")
+   {
+     for (int i = 0 ; i < _Ny; i++)
+     {
+       _LapMat.coeffRef(_Nx*i,_Nx*i) += beta[_Nx*i];  //Bord gauche
+     }
+   }
+
+   if (_CL_droite == "Neumann")
+   {
+     for (int i = 0 ; i < _Ny; i++)
+     {
+       _LapMat.coeffRef(_Nx*(i+1) - 1, _Nx*(i+1) - 1) += beta[_Nx*(i+1) - 1]; //Bord droite
+     }
+   }
+
+
+   if (_CL_haut == "Neumann")
+   {
+     for (int i = 0; i < _Nx ; i++)
+     {
+       _LapMat.coeffRef(i,i) += gamma[i]; //Bord haut
+     }
+   }
+
+   if (_CL_bas == "Neumann")
+   {
+     for (int i = 0; i < _Nx ; i++)
+     {
+       _LapMat.coeffRef((_Ny - 1)* _Nx + i , (_Ny - 1)* _Nx + i) += gamma[(_Ny - 1)* _Nx + i]; //Bord bas
+     }
+   }
 }
 
 
@@ -842,7 +936,7 @@ void EC_PyrolyseMC::Rho_Cal_P()
       //sol exacte
       C[i] = exp(-_Ta/_sol_T[i]);
       // _RhoTilde[i] = _sol_R[i]*((exp(k*_deltaT)-1)*C[i]+1) - k*_rho_v*C[i]*_deltaT;
-      _RhoTilde[i] = _sol_R[i]*exp(k*C[i]*_deltaT)  + _rho_p;
+      _RhoTilde[i] = (_sol_R[i]-_rho_p)*exp(k*C[i]*_deltaT)  + _rho_p;
     }
 }
 
@@ -864,7 +958,7 @@ void EC_PyrolyseMC::Rho_Cal_C()
       //sol exacte
       C[i] = exp(-_Ta/_sol_T[i]);
       // _sol_R[i] = _sol_R[i]*((exp(k*_deltaT)-1)*C[i]+1) - k*_rho_v*C[i]*_deltaT;
-      _sol_R[i] = _sol_R[i]*exp(k*C[i]*_deltaT) + _rho_p;
+      _sol_R[i] = (_sol_R[i]-_rho_p)*exp(k*C[i]*_deltaT) + _rho_p;
     }
 }
 
@@ -976,7 +1070,7 @@ void EC_PyrolyseMC::Advance(int nb_iterations)
 	  EC_PyrolyseMC::SaveSol(i);
 	}
 
-      if (_save_points_file != "non")
+      // if (_save_points_file != "non")
       	{
       	  char* truc = new char;
       	  for (int j=0; j<_number_saved_points; j++)
@@ -988,7 +1082,7 @@ void EC_PyrolyseMC::Advance(int nb_iterations)
       	      truc_b3 = _sol_R(pos) ;
       	      sprintf(truc, "%f  %f ", truc_b1, truc_b2);
       	      mes_flux[j]->write(truc,20);
-	      sprintf(truc, "  %f",truc_b3);		
+	      sprintf(truc, "  %f",truc_b3);
 	      mes_flux[j]->write(truc,12);
       	      mes_flux[j]->write("\n",1);
       	      //Bon alors je vais expliquer un peu le bordel que c'est :
@@ -1027,11 +1121,188 @@ void EC_PyrolyseMC::Advance(int nb_iterations)
     {
       //On referme les flux qu'on a ouvert
       for (int i=0; i<_number_saved_points; i++)
-	{ 
+	{
 	  mes_flux[i]->close();
 	}
     }
 
   printf( "\n" );
 
+}
+
+void EC_PyrolyseMC::IterativeSolver (int nb_iterations)
+{
+  //ConjugateGradient <SparseMatrix<double> > solver;
+  BiCGSTAB <SparseMatrix<double> > solver;
+
+  vector< shared_ptr<ofstream> > mes_flux;
+
+  if(_save_points_file != "non")
+    {
+      //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
+      for (int i=0; i<_number_saved_points; i++)
+	{
+	  shared_ptr<ofstream> flux(new ofstream);
+	  flux->open(_save_points_file+"/point_"+to_string(i), ios::out);
+	  mes_flux.push_back(flux);
+	}
+    }
+
+  for( int i=0 ; i<=nb_iterations ; i++)
+    {
+
+      // Systeme de sauvegarde de points :---------------------------------
+      if (_save_all_file != "non")
+	{
+	  EC_PyrolyseMC::SaveSol(i);
+	}
+
+
+      if (_save_points_file != "non")
+	{
+	  char* truc = new char;
+	  for (int j=0; j<_number_saved_points; j++)
+	    {
+	      double truc_b1, truc_b2;
+	      truc_b1 = i*_deltaT;
+	      int pos = floor((_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y));
+	      truc_b2 = _sol(pos) ;
+	      sprintf(truc, "%f  %f", truc_b1, truc_b2);
+	      mes_flux[j]->write(truc,16);
+	      mes_flux[j]->write("\n",1);
+	      //Bon alors je vais expliquer un peu le bordel que c'est :
+	      //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement
+	      //Et à cause de ça je peux pas faire << comme d'hab
+	      //Donc j'utilise write (qui marche avec les pointeurs mais qui est plus chiant à utiliser) et c'est pour ça que c'est dégueu
+	      //Mais en gros ça marche comme ça (d'après ce que j'ai pigé) :
+	      //Tu utilise sprintf pour transformer tes nombres en des chaine de charactères puis write pour l'écrire dans ton fichier
+	      //Voilà. (Si vous avez besoin d'y retoucher demander moi avant svp)
+	    }
+	}
+      //-------------------------------------------------------------------
+
+      Rho_Cal_P();
+      EC_PyrolyseMC::InitializeMatrix();
+      solver.compute(_LapMat);
+      EC_PyrolyseMC::ConditionsLimites(i);
+      _f.resize(_Nx*_Ny);
+      for (int j =0; j<_Nx*_Ny ; j++)
+        {
+          _f(j) = _sol_T(j);
+        }
+      _sol_T = solver.solve(_f);
+      Rho_Cal_C();
+
+
+    //barre_de_chargement
+
+    int i_barre;
+    int p = floor((((double)i)/((double)nb_iterations))*100);
+    printf( "[" );
+    for(i_barre=0;i_barre<=p;i_barre+=2) printf( "*" );
+    for (;i_barre<100; i_barre+=2 ) printf( "-" );
+    printf( "] %3d %%", p );
+
+    for(i_barre=0;i_barre<59;++i_barre) printf( "%c", 8 );
+
+    fflush(stdout );
+  }
+
+  if(_save_points_file != "non")
+    {
+      //On referme les flux qu'on a ouvert
+      for (int i=0; i<_number_saved_points; i++)
+	{
+	  mes_flux[i]->close();
+	}
+    }
+
+}
+
+void EC_PyrolyseMC::ConditionsLimites(int num_it)
+{
+  Eigen::VectorXd alpha;
+  Eigen::VectorXd beta;
+  Eigen::VectorXd gamma;
+
+  alpha.resize(_Nx*_Ny);
+  beta.resize(_Nx*_Ny);
+  gamma.resize(_Nx*_Ny);
+
+  for (int i=0;i<_Nx*_Ny;i++)
+    {
+      alpha[i] = 1 + 2*(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_x*_h_x) + 2*(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_y*_h_y);
+      beta[i] = -(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_x*_h_x);
+      gamma[i] = -(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_y*_h_y);
+    }
+
+  if (_CL_haut == "Dirichlet") //Condition de température en haut
+  {
+    for (int j = 0; j < _Nx ; j++)
+    {
+      _sol_T(j) = _sol_T(j)-gamma(j)*_Val_CL_haut;
+    }
+  }
+  if (_CL_bas == "Dirichlet") //Condition de température en bas
+  {
+    for (int j = 0; j < _Nx ; j++)
+    {
+      _sol_T(_Nx*(_Ny -1)+ j) = _sol_T(_Nx*(_Ny -1)+ j)-gamma(_Nx*(_Ny -1)+ j)*_Val_CL_bas;
+    }
+  }
+
+  if (_CL_gauche == "Dirichlet")  //Condition de température à gauche
+  {
+    for (int i = 0; i < _Ny; i++)
+    {
+      _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche;
+    }
+  }
+  if (_CL_droite == "Dirichlet") //Condition de température à droite
+  {
+    for (int i = 0; i < _Ny; i++)
+    {
+      _sol_T((i+1)*_Nx - 1) = _sol_T((i+1)*_Nx - 1)-beta((i+1)*_Nx - 1)*_Val_CL_droite;
+    }
+  }
+
+  if (_CL_haut == "Neumann") //Condition de flux en haut
+  {
+    for (int j = 0; j < _Nx ; j++)
+    {
+      _sol_T(j) = _sol_T(j)+gamma(j)*_Val_CL_haut*_h_y;
+    }
+  }
+  if (_CL_bas == "Neumann") //Condition de flux en bas
+  {
+    for (int j = 0; j < _Nx ; j++)
+    {
+      _sol_T(_Nx*(_Ny -1)+ j) = _sol_T(_Nx*(_Ny -1)+ j)+gamma(_Nx*(_Ny -1)+ j)*_Val_CL_bas*_h_y;
+    }
+  }
+
+  if (_CL_gauche == "Neumann")  //Condition de flux à gauche
+  {
+    for (int i = 0; i < _Ny; i++)
+    {
+      _sol_T(i*_Nx) = _sol_T(i*_Nx)+beta(i*_Nx)*_Val_CL_gauche*_h_x;
+    }
+  }
+
+  if (_CL_gauche == "Neumann_non_constant")  //Condition de flux à gauche
+  {
+    Laplacian2D::UpdateCL(num_it);
+    for (int i = 0; i < _Ny; i++)
+    {
+      _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche*_h_x;
+    }
+  }
+
+  if (_CL_droite == "Neumann") //Condition de flux à droite
+  {
+    for (int i = 0; i < _Ny; i++)
+    {
+      _sol_T((i+1)*_Nx - 1) = _sol_T((i+1)*_Nx - 1)+beta((i+1)*_Nx - 1)*_Val_CL_droite*_h_x;
+    }
+  }
 }
