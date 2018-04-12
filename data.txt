@@ -43,6 +43,9 @@ T final :
 lambda :
 1.
 
+rho :
+1000
+
 rhop :
 1000.
 
@@ -66,10 +69,10 @@ Schema :
 tkt_bro
 
 Fichier Paraview :
-sol_1
+non
 
 Fichier sauvegarde points :
-sol_pts_1
+non
 
 Nombre de points à sauver :
 5

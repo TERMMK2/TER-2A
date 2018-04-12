@@ -509,9 +509,22 @@ void EC_ClassiqueP::IterativeSolver (int nb_iterations)
           _f(j) = _sol(j);
         }
       _sol = solver.solve(_f);
+
+      //Barre de chargement
+      int i_barre;
+      int p = floor((((double)i)/((double)nb_iterations))*100);
+      printf( "[" );
+      for(i_barre=0;i_barre<=p;i_barre+=2) printf( "*" );
+      for (;i_barre<100; i_barre+=2 ) printf( "-" );
+      printf( "] %3d %%", p );
+
+      for(i_barre=0;i_barre<59;++i_barre) printf( "%c", 8 );
+
+      fflush(stdout );
     }
 
-  
+  printf("\n");
+
   if(_save_points_file != "non")
     {
       //On referme les flux qu'on a ouvert
