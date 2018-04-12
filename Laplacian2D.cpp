@@ -108,20 +108,9 @@ void Laplacian2D::UpdateCL(int num_it)
 
 
 
-void EC_ClassiqueM::InitializeMatrix()
+void Laplacian2D::InitializeMatrix()
 {
-  _x.resize(_Nx);
-  _y.resize(_Ny);
-  for (int j =0; j < _Nx ; j++)
-  {
-    _x(j) = _x_min + j*_h_x;
-  }
-
-  for (int i = 0; i < _Ny ; i++)
-  {
-    _y(i) = _y_min + i*_h_y;
-  }
-
+  
   _LapMat.resize(_Nx*_Ny,_Nx*_Ny);
 
   double alpha = 1 + 2*_a*_deltaT/(_h_x*_h_x) + 2*_a*_deltaT/(_h_y*_h_y);
@@ -154,47 +143,10 @@ void EC_ClassiqueM::InitializeMatrix()
 
 void EC_ClassiqueP::InitializeMatrix()
 {
-  _x.resize(_Nx);
-  _y.resize(_Ny);
-  for (int j =0; j < _Nx ; j++)
-  {
-    _x(j) = _x_min + j*_h_x;
-  }
+  Laplacian2D::InitializeMatrix();
 
-  for (int i = 0; i < _Ny ; i++)
-  {
-    _y(i) = _y_min + i*_h_y;
-  }
-
-  _LapMat.resize(_Nx*_Ny,_Nx*_Ny);
-
-  double alpha = 1 + 2*_a*_deltaT/(_h_x*_h_x) + 2*_a*_deltaT/(_h_y*_h_y);
   double beta = -_a*_deltaT/(_h_x*_h_x);
   double gamma = -_a*_deltaT/(_h_y*_h_y);
-
-  vector<Triplet<double>> liste_elem;
-
-  for (int i = 0 ; i<_Nx*_Ny ; i++)
-  {
-    liste_elem.push_back({i,i,alpha});
-  }
-
-  for (int i = 0 ; i<_Ny*_Nx-1; i++)
-  {
-    if ((i+1)%_Nx!=0)
-    {
-      liste_elem.push_back({i,i+1,beta});
-      liste_elem.push_back({i+1,i,beta});
-    }
-  }
-  for (int i = 0 ; i<_Nx*(_Ny-1) ; i++)
-  {
-    liste_elem.push_back({i,_Nx+i,gamma});
-    liste_elem.push_back({_Nx+i,i,gamma});
-  }
-
-  _LapMat.setFromTriplets(liste_elem.begin(), liste_elem.end());
-
 
 
  if (_CL_gauche == "Neumann" or _CL_gauche == "Neumann_non_constant")

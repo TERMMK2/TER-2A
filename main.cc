@@ -74,7 +74,7 @@ int main(int argc, char** argv)
        double t = chrono::duration_cast<chrono::microseconds>(finish-start).count();
        cout << "Le prog a mis " << t*0.000001 << " secondes a s'effectuer" << endl;
      }
-  if (data_file.Get_eq() == "EC_Pyrolyse")
+  if (data_file.Get_eq() == "EC_PyrolyseMC")
      {
        Lap = new EC_PyrolyseMC();
        Lap->Initialize(data_file);

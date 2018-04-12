@@ -56,7 +56,7 @@ void DataFile::ReadDataFile()
   while (!data_file.eof())
     {
       getline(data_file, file_line);
-      cout << file_line <<endl;
+      //cout << file_line <<endl;
       if (file_line.find("CL droite :") != std::string::npos)
 	{
 	  data_file >> _CL_droite; _if_CL_droite = true;

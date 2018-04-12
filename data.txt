@@ -17,10 +17,10 @@ Equation :
 EC_ClassiqueP
 
 N_x :
-500
+50
 
 N_y :
-50
+5
 
 x_min :
 0
@@ -69,10 +69,10 @@ Schema :
 tkt_bro
 
 Fichier Paraview :
-non
+sol_1
 
 Fichier sauvegarde points :
-non
+sol_pts_1
 
 Nombre de points à sauver :
 5
