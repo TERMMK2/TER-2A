@@ -521,11 +521,6 @@ void Laplacian2D::SaveSol(string name_file)
   mon_flux.close();
 }
 
-
-
-
-
-
 void EC_ClassiqueM::ConditionsLimites(int num_it)
 {
   Eigen :: VectorXd temp(_Nx*_Ny);
@@ -541,7 +536,7 @@ void EC_ClassiqueM::ConditionsLimites(int num_it)
   {
     for (int j = 0; j < _Nx ; j++) //Condition de flux en haut
     {
-      _sol(j) = _sol(j)-gamma*temp(j) + gamma*_Val_CL_haut*_h_y;
+      _sol(j) = _sol(j)-gamma*temp(j) - gamma*_Val_CL_haut*_h_y;
     }
   }
 
@@ -549,7 +544,7 @@ void EC_ClassiqueM::ConditionsLimites(int num_it)
   {
     for (int j = 0; j < _Nx ; j++)
     {
-      _sol(_Nx*(_Ny -1)+ j) = _sol(_Nx*(_Ny -1)+ j)-gamma*temp(_Nx*(_Ny -1)+ j) + gamma*_Val_CL_bas*_h_y;
+      _sol(_Nx*(_Ny -1)+ j) = _sol(_Nx*(_Ny -1)+ j)-gamma*temp(_Nx*(_Ny -1)+ j) - gamma*_Val_CL_bas*_h_y;
     }
   }
 
@@ -557,7 +552,7 @@ void EC_ClassiqueM::ConditionsLimites(int num_it)
   {
     for (int i = 0; i < _Ny; i++)
     {
-      _sol(i*_Nx) = _sol(i*_Nx)-beta*temp(i*_Nx) + beta*_Val_CL_gauche*_h_x;
+      _sol(i*_Nx) = _sol(i*_Nx)-beta*temp(i*_Nx) - beta*_Val_CL_gauche*_h_x;
     }
   }
 
@@ -575,7 +570,7 @@ void EC_ClassiqueM::ConditionsLimites(int num_it)
   {
     for (int i = 0; i < _Ny; i++)
     {
-      _sol((i+1)*_Nx - 1) = _sol((i+1)*_Nx - 1)-beta*temp((i+1)*_Nx - 1) + beta*_Val_CL_droite*_h_x;
+      _sol((i+1)*_Nx - 1) = _sol((i+1)*_Nx - 1)-beta*temp((i+1)*_Nx - 1) - beta*_Val_CL_droite*_h_x;
     }
   }
 
@@ -649,14 +644,14 @@ void EC_ClassiqueP::ConditionsLimites(int num_it)
   {
     for (int j = 0; j < _Nx ; j++)
     {
-      _sol(j) = _sol(j)+gamma*_Val_CL_haut*_h_y;
+      _sol(j) = _sol(j)-gamma*_Val_CL_haut*_h_y;
     }
   }
   if (_CL_bas == "Neumann") //Condition de flux en bas
   {
     for (int j = 0; j < _Nx ; j++)
     {
-      _sol(_Nx*(_Ny -1)+ j) = _sol(_Nx*(_Ny -1)+ j)+gamma*_Val_CL_bas*_h_y;
+      _sol(_Nx*(_Ny -1)+ j) = _sol(_Nx*(_Ny -1)+ j)-gamma*_Val_CL_bas*_h_y;
     }
   }
 
@@ -664,7 +659,7 @@ void EC_ClassiqueP::ConditionsLimites(int num_it)
   {
     for (int i = 0; i < _Ny; i++)
     {
-      _sol(i*_Nx) = _sol(i*_Nx)+beta*_Val_CL_gauche*_h_x;
+      _sol(i*_Nx) = _sol(i*_Nx)-beta*_Val_CL_gauche*_h_x;
     }
   }
 
@@ -681,7 +676,7 @@ void EC_ClassiqueP::ConditionsLimites(int num_it)
   {
     for (int i = 0; i < _Ny; i++)
     {
-      _sol((i+1)*_Nx - 1) = _sol((i+1)*_Nx - 1)+beta*_Val_CL_droite*_h_x;
+      _sol((i+1)*_Nx - 1) = _sol((i+1)*_Nx - 1)-beta*_Val_CL_droite*_h_x;
     }
   }
 }
