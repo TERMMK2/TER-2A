@@ -819,7 +819,7 @@ void EC_PyrolyseMC::Flux_Cal(int i, int j)
 
   //Modifier les valeurs limites en fonction des conditions
   if (_CL_gauche == "Neumann" or _CL_gauche == "Neumann_non_constant")
-    Tg = _sol_T[_Nx*i+0] - _h_x*_Val_CL_gauche;
+    Tg = _sol_T[_Nx*i+0] + _h_x*_Val_CL_gauche;
   else
     Tg = _Val_CL_gauche;
 
@@ -834,7 +834,7 @@ void EC_PyrolyseMC::Flux_Cal(int i, int j)
     Th = _Val_CL_haut;;
 
   if (_CL_bas == "Neumann")
-    Tb = _sol_T[_Nx*0+j] - _h_y*_Val_CL_bas;
+    Tb = _sol_T[_Nx*0+j] + _h_y*_Val_CL_bas;
   else
     Tb = _Val_CL_bas;
 
