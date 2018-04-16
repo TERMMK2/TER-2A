@@ -1085,9 +1085,10 @@ void EC_PyrolyseMC::Advance(int nb_iterations)
         int pos = floor((_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y));
         truc_b2 = _sol_T(pos) ;
         truc_b3 = _sol_R(pos) ;
-        sprintf(truc, "%f  %f ", truc_b1, truc_b2);
-        mes_flux[j]->write(truc,20);
-        sprintf(truc, "  %f",truc_b3);
+        sprintf(truc, "%f  %f", truc_b1, truc_b2);
+        mes_flux[j]->write(truc,16);
+        mes_flux[j]->write("\n",1);
+        sprintf(truc, "%f  %f", truc_b1, truc_b3);
         mes_flux[j+_number_saved_points]->write(truc,16);
         mes_flux[j+_number_saved_points]->write("\n",1);
         //Bon alors je vais expliquer un peu le bordel que c'est :
