@@ -1088,8 +1088,8 @@ void EC_PyrolyseMC::Advance(int nb_iterations)
         sprintf(truc, "%f  %f ", truc_b1, truc_b2);
         mes_flux[j]->write(truc,20);
         sprintf(truc, "  %f",truc_b3);
-        mes_flux[j]->write(truc,12);
-        mes_flux[j]->write("\n",1);
+        mes_flux[j+_number_saved_points]->write(truc,16);
+        mes_flux[j+_number_saved_points]->write("\n",1);
         //Bon alors je vais expliquer un peu le bordel que c'est :
         //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement
         //Et à cause de ça je peux pas faire << comme d'hab
