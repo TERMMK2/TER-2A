@@ -1276,18 +1276,18 @@ void EC_PyrolyseMC::ConditionsLimites(int num_it)
     }
   }
 
-  if (_CL_haut == "Neumann") //Condition de flux en haut
+    if (_CL_haut == "Neumann") //Condition de flux en haut
   {
     for (int j = 0; j < _Nx ; j++)
     {
-      _sol_T(j) = _sol_T(j)+gamma(j)*_Val_CL_haut*_h_y;
+      _sol_T(j) = _sol_T(j)-gamma(j)*_Val_CL_haut*_h_y;
     }
   }
   if (_CL_bas == "Neumann") //Condition de flux en bas
   {
     for (int j = 0; j < _Nx ; j++)
     {
-      _sol_T(_Nx*(_Ny -1)+ j) = _sol_T(_Nx*(_Ny -1)+ j)+gamma(_Nx*(_Ny -1)+ j)*_Val_CL_bas*_h_y;
+      _sol_T(_Nx*(_Ny -1)+ j) = _sol_T(_Nx*(_Ny -1)+ j)-gamma(_Nx*(_Ny -1)+ j)*_Val_CL_bas*_h_y;
     }
   }
 
@@ -1295,7 +1295,7 @@ void EC_PyrolyseMC::ConditionsLimites(int num_it)
   {
     for (int i = 0; i < _Ny; i++)
     {
-      _sol_T(i*_Nx) = _sol_T(i*_Nx)+beta(i*_Nx)*_Val_CL_gauche*_h_x;
+      _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche*_h_x;
     }
   }
 
@@ -1312,7 +1312,7 @@ void EC_PyrolyseMC::ConditionsLimites(int num_it)
   {
     for (int i = 0; i < _Ny; i++)
     {
-      _sol_T((i+1)*_Nx - 1) = _sol_T((i+1)*_Nx - 1)+beta((i+1)*_Nx - 1)*_Val_CL_droite*_h_x;
+      _sol_T((i+1)*_Nx - 1) = _sol_T((i+1)*_Nx - 1)-beta((i+1)*_Nx - 1)*_Val_CL_droite*_h_x;
     }
   }
 }
