@@ -84,11 +84,7 @@ void Laplacian2D::Initialize(DataFile data_file)
       system(("mkdir -p ./"+_save_all_file).c_str());
     }
 
-  if (_save_points_file !="non")
-    {
-      system(("rm -Rf "+_save_points_file).c_str());
-      system(("mkdir -p ./"+_save_points_file).c_str());
-    }
+  
 }
 
 
@@ -201,17 +197,12 @@ void EC_ClassiqueM::DirectSolver (int nb_iterations) //il reste un petit truc à
   SimplicialLLT <SparseMatrix<double> > solver;
   solver.compute(_LapMat);
 
-  vector< shared_ptr<ofstream> > mes_flux;
+  ofstream* flux_pts(new ofstream);
 
   if(_save_points_file != "non")
     {
       //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
-      for (int i=0; i<_number_saved_points; i++)
-	{
-	  shared_ptr<ofstream> flux(new ofstream);
-	  flux->open(_save_points_file+"/point_"+to_string(i), ios::out);
-	  mes_flux.push_back(flux);
-	}
+      flux_pts->open(_save_points_file+".txt", ios::out);
     }
 
   for( int i=0 ; i<=nb_iterations ; i++)
@@ -226,24 +217,14 @@ void EC_ClassiqueM::DirectSolver (int nb_iterations) //il reste un petit truc à
 
       if (_save_points_file != "non")
 	{
-	  char* truc = new char;
+	  *flux_pts<<i*_deltaT<<" ";
+	  //char* truc = new char;
 	  for (int j=0; j<_number_saved_points; j++)
 	    {
-	      double truc_b1, truc_b2;
-	      truc_b1 = i*_deltaT;
-	      int pos = floor((_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y));
-	      truc_b2 = _sol(pos) ;
-	      sprintf(truc, "%f  %f", truc_b1, truc_b2);
-	      mes_flux[j]->write(truc,16);
-	      mes_flux[j]->write("\n",1);
-	      //Bon alors je vais expliquer un peu le bordel que c'est :
-	      //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement
-	      //Et à cause de ça je peux pas faire << comme d'hab
-	      //Donc j'utilise write (qui marche avec les pointeurs mais qui est plus chiant à utiliser) et c'est pour ça que c'est dégueu
-	      //Mais en gros ça marche comme ça (d'après ce que j'ai pigé) :
-	      //Tu utilise sprintf pour transformer tes nombres en des chaine de charactères puis write pour l'écrire dans ton fichier
-	      //Voilà. (Si vous avez besoin d'y retoucher demander moi avant svp)
+	      int pos = floor(_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y);
+	      *flux_pts<<_sol(pos)<<" ";
 	    }
+	  *flux_pts<<endl;
 	}
       //-------------------------------------------------------------------
 
@@ -260,13 +241,10 @@ void EC_ClassiqueM::DirectSolver (int nb_iterations) //il reste un petit truc à
   if(_save_points_file != "non")
     {
       //On referme les flux qu'on a ouvert
-      for (int i=0; i<_number_saved_points; i++)
-	{
-	  mes_flux[i]->close();
-	}
+      flux_pts->close();
     }
 
-
+  delete flux_pts;
 }
 
 void EC_ClassiqueP::DirectSolver (int nb_iterations)
@@ -274,17 +252,12 @@ void EC_ClassiqueP::DirectSolver (int nb_iterations)
   SimplicialLLT <SparseMatrix<double> > solver;
   solver.compute(_LapMat);
 
-  vector< shared_ptr<ofstream> > mes_flux;
+  ofstream* flux_pts(new ofstream);
 
   if(_save_points_file != "non")
     {
       //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
-      for (int i=0; i<_number_saved_points; i++)
-	{
-	  shared_ptr<ofstream> flux(new ofstream);
-	  flux->open(_save_points_file+"/point_"+to_string(i), ios::out);
-	  mes_flux.push_back(flux);
-	}
+      flux_pts->open(_save_points_file+".txt", ios::out);
     }
 
   for( int i=0 ; i<=nb_iterations ; i++)
@@ -297,27 +270,17 @@ void EC_ClassiqueP::DirectSolver (int nb_iterations)
 	}
 
 
-      // if (_save_points_file != "non")
-      // 	{
-      // 	  char* truc = new char;
-      // 	  for (int j=0; j<_number_saved_points; j++)
-      // 	    {
-      // 	      double truc_b1, truc_b2;
-      // 	      truc_b1 = i*_deltaT;
-      // 	      int pos = floor((_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y));
-      // 	      truc_b2 = _sol(pos) ;
-      // 	      sprintf(truc, "%f  %f", truc_b1, truc_b2);
-      // 	      mes_flux[j]->write(truc,16);
-      // 	      mes_flux[j]->write("\n",1);
-      // 	      //Bon alors je vais expliquer un peu le bordel que c'est :
-      // 	      //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement
-      // 	      //Et à cause de ça je peux pas faire << comme d'hab
-      // 	      //Donc j'utilise write (qui marche avec les pointeurs mais qui est plus chiant à utiliser) et c'est pour ça que c'est dégueu
-      // 	      //Mais en gros ça marche comme ça (d'après ce que j'ai pigé) :
-      // 	      //Tu utilise sprintf pour transformer tes nombres en des chaine de charactères puis write pour l'écrire dans ton fichier
-      // 	      //Voilà. (Si vous avez besoin d'y retoucher demander moi avant svp)
-      // 	    }
-      //}
+       if (_save_points_file != "non")
+	 {
+	   *flux_pts<<i*_deltaT<<" ";
+	  //char* truc = new char;
+	  for (int j=0; j<_number_saved_points; j++)
+	    {
+	      int pos = floor(_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y);
+	      *flux_pts<<_sol(pos)<<" ";
+	    }
+	  *flux_pts<<endl;
+	 }
       //-------------------------------------------------------------------
 
       EC_ClassiqueP::ConditionsLimites(i);
@@ -333,12 +296,11 @@ void EC_ClassiqueP::DirectSolver (int nb_iterations)
   if(_save_points_file != "non")
     {
       //On referme les flux qu'on a ouvert
-      for (int i=0; i<_number_saved_points; i++)
-	{
-	  mes_flux[i]->close();
-	}
+      flux_pts->close();
     }
 
+  delete flux_pts;
+  
 }
 
 
@@ -347,17 +309,12 @@ void EC_ClassiqueM::IterativeSolver (int nb_iterations)
   ConjugateGradient <SparseMatrix<double> > solver;
   solver.compute(_LapMat);
 
-  vector< shared_ptr<ofstream> > mes_flux;
+  ofstream* flux_pts(new ofstream);
 
   if(_save_points_file != "non")
     {
       //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
-      for (int i=0; i<_number_saved_points; i++)
-	{
-	  shared_ptr<ofstream> flux(new ofstream);
-	  flux->open(_save_points_file+"/point_"+to_string(i), ios::out);
-	  mes_flux.push_back(flux);
-	}
+      flux_pts->open(_save_points_file+".txt", ios::out);
     }
 
   for( int i=0 ; i<=nb_iterations ; i++)
@@ -372,24 +329,14 @@ void EC_ClassiqueM::IterativeSolver (int nb_iterations)
 
       if (_save_points_file != "non")
 	{
-	  char* truc = new char;
+	  *flux_pts<<i*_deltaT<<" ";
+	  //char* truc = new char;
 	  for (int j=0; j<_number_saved_points; j++)
 	    {
-	      double truc_b1, truc_b2;
-	      truc_b1 = i*_deltaT;
-	      int pos = floor((_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y));
-	      truc_b2 = _sol(pos) ;
-	      sprintf(truc, "%f  %f", truc_b1, truc_b2);
-	      mes_flux[j]->write(truc,16);
-	      mes_flux[j]->write("\n",1);
-	      //Bon alors je vais expliquer un peu le bordel que c'est :
-	      //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement
-	      //Et à cause de ça je peux pas faire << comme d'hab
-	      //Donc j'utilise write (qui marche avec les pointeurs mais qui est plus chiant à utiliser) et c'est pour ça que c'est dégueu
-	      //Mais en gros ça marche comme ça (d'après ce que j'ai pigé) :
-	      //Tu utilise sprintf pour transformer tes nombres en des chaine de charactères puis write pour l'écrire dans ton fichier
-	      //Voilà. (Si vous avez besoin d'y retoucher demander moi avant svp)
+	      int pos = floor(_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y);
+	      *flux_pts<<_sol(pos)<<" ";
 	    }
+	  *flux_pts<<endl;
 	}
       //-------------------------------------------------------------------
 
@@ -405,13 +352,11 @@ void EC_ClassiqueM::IterativeSolver (int nb_iterations)
 
   if(_save_points_file != "non")
     {
-      //On referme les flux qu'on a ouvert
-      for (int i=0; i<_number_saved_points; i++)
-	{
-	  mes_flux[i]->close();
-	}
+      flux_pts->close();
     }
 
+  delete flux_pts;
+  
 }
 
 void EC_ClassiqueP::IterativeSolver (int nb_iterations)
@@ -419,17 +364,12 @@ void EC_ClassiqueP::IterativeSolver (int nb_iterations)
   ConjugateGradient <SparseMatrix<double> > solver;
   solver.compute(_LapMat);
 
-  vector< shared_ptr<ofstream> > mes_flux;
+  ofstream* flux_pts(new ofstream);
 
   if(_save_points_file != "non")
     {
       //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
-      for (int i=0; i<_number_saved_points; i++)
-	{
-	  shared_ptr<ofstream> flux(new ofstream);
-	  flux->open(_save_points_file+"/point_"+to_string(i), ios::out);
-	  mes_flux.push_back(flux);
-	}
+      flux_pts->open(_save_points_file+".txt", ios::out);
     }
 
   for( int i=0 ; i<=nb_iterations ; i++)
@@ -444,46 +384,34 @@ void EC_ClassiqueP::IterativeSolver (int nb_iterations)
 
       if (_save_points_file != "non")
 	{
-	  char* truc = new char;
+	  *flux_pts<<i*_deltaT<<" ";
+	  //char* truc = new char;
 	  for (int j=0; j<_number_saved_points; j++)
 	    {
-	      double truc_b1, truc_b2;
-	      truc_b1 = i*_deltaT;
-	      int pos = floor((_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y));
-	      truc_b2 = _sol(pos) ;
-	      sprintf(truc, "%f  %f", truc_b1, truc_b2);
-	      mes_flux[j]->write(truc,16);
-	      mes_flux[j]->write("\n",1);
-	      //Bon alors je vais expliquer un peu le bordel que c'est :
-	      //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement
-	      //Et à cause de ça je peux pas faire << comme d'hab
-	      //Donc j'utilise write (qui marche avec les pointeurs mais qui est plus chiant à utiliser) et c'est pour ça que c'est dégueu
-	      //Mais en gros ça marche comme ça (d'après ce que j'ai pigé) :
-	      //Tu utilise sprintf pour transformer tes nombres en des chaine de charactères puis write pour l'écrire dans ton fichier
-	      //Voilà. (Si vous avez besoin d'y retoucher demander moi avant svp)
+	      int pos = floor(_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y);
+	      *flux_pts<<_sol(pos)<<" ";
 	    }
+	  *flux_pts<<endl;
 	}
+    
       //-------------------------------------------------------------------
 
       EC_ClassiqueP::ConditionsLimites(i);
       _f.resize(_Nx*_Ny);
       for (int j =0; j<_Nx*_Ny ; j++)
-        {
-          _f(j) = _sol(j);
-        }
+	{
+	  _f(j) = _sol(j);
+	}
       _sol = solver.solve(_f);
     }
 
 
   if(_save_points_file != "non")
     {
-      //On referme les flux qu'on a ouvert
-      for (int i=0; i<_number_saved_points; i++)
-	{
-	  mes_flux[i]->close();
-	}
+      flux_pts->close();
     }
-
+  delete flux_pts;
+  
 }
 
 
@@ -681,7 +609,13 @@ void EC_ClassiqueP::ConditionsLimites(int num_it)
   }
 }
 
-//-----------------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------------------------------------------------------------
+//Début de EC_Pyrolyse:
+//-------------------------------------------------------------------------------------------------------------------------
+
+
 
 
 void EC_PyrolyseMC::Initialize(DataFile data_file)
@@ -1043,91 +977,64 @@ void EC_PyrolyseMC::SaveSol(int iteration)
 
 void EC_PyrolyseMC::Advance(int nb_iterations)
 {
-  vector< shared_ptr<ofstream> > mes_flux;
-  if(_save_points_file != "non")
-  {
-    //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
-    for (int i=0; i<_number_saved_points; i++)
-    {
-      shared_ptr<ofstream> flux(new ofstream);
-      flux->open(_save_points_file+"/T_"+to_string(i), ios::out);
-      mes_flux.push_back(flux);
-    }
-    for (int i=0; i<_number_saved_points; i++)
-    {
-      shared_ptr<ofstream> flux(new ofstream);
-      flux->open(_save_points_file+"/R_"+to_string(i), ios::out);
-      mes_flux.push_back(flux);
-    }
-  }
 
+  ofstream* flux_pts(new ofstream);
+
+  
+  if(_save_points_file != "non")
+    {
+      //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
+      flux_pts->open(_save_points_file+".txt", ios::out);
+    
+    }
 
   for( int i=0 ; i<=nb_iterations ; i++)
-  {
-    // Systeme de sauvegarde de points :---------------------------------
-    if (_save_all_file != "non")
     {
-      EC_PyrolyseMC::SaveSol(i);
+      // Systeme de sauvegarde de points :---------------------------------
+      if (_save_all_file != "non")
+	{
+	  EC_PyrolyseMC::SaveSol(i);
+	}
+
+      if (_save_points_file != "non")
+	{
+	  *flux_pts<<i*_deltaT<<" ";
+	  //char* truc = new char;
+	  for (int j=0; j<_number_saved_points; j++)
+	    {
+	      int pos = floor(_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y);
+	      *flux_pts<<_sol_T(pos)<<" "<<_sol_R(pos)<<" ";
+	    }
+	  *flux_pts<<endl;
+	}
+
+      Rho_Cal_P();
+      Laplacian2D::UpdateCL(i+1);
+      T_Cal();
+      Rho_Cal_C();
+
+
+      //Barre de chargement
+      int i_barre;
+      int p = floor((((double)i)/((double)nb_iterations))*100);
+      printf( "[" );
+      for(i_barre=0;i_barre<=p;i_barre+=2) printf( "*" );
+      for (;i_barre<100; i_barre+=2 ) printf( "-" );
+      printf( "] %3d %%", p );
+
+      for(i_barre=0;i_barre<59;++i_barre) printf( "%c", 8 );
+
+      fflush(stdout );
+
     }
-
-    if (_save_points_file != "non")
-    {
-      char* truc = new char;
-      for (int j=0; j<_number_saved_points; j++)
-      {
-        double truc_b1, truc_b2, truc_b3;
-        truc_b1 = i*_deltaT;
-        int pos = floor((_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y));
-        truc_b2 = _sol_T(pos) ;
-        truc_b3 = _sol_R(pos) ;
-        sprintf(truc, "%f  %f", truc_b1, truc_b2);
-        mes_flux[j]->write(truc,16);
-        mes_flux[j]->write("\n",1);
-        sprintf(truc, "%f  %f", truc_b1, truc_b3);
-        mes_flux[j+_number_saved_points]->write(truc,16);
-        mes_flux[j+_number_saved_points]->write("\n",1);
-        //Bon alors je vais expliquer un peu le bordel que c'est :
-        //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement
-        //Et à cause de ça je peux pas faire << comme d'hab
-        //Donc j'utilise write (qui marche avec les pointeurs mais qui est plus chiant à utiliser) et c'est pour ça que c'est dégueu
-        //Mais en gros ça marche comme ça (d'après ce que j'ai pigé) :
-        //Tu utilise sprintf pour transformer tes nombres en des chaine de charactères puis write pour l'écrire dans ton fichier
-        //Voilà. (Si vous avez besoin d'y retoucher demander moi avant svp)
-      }
-      delete truc;
-
-    }
-
-    Rho_Cal_P();
-    Laplacian2D::UpdateCL(i+1);
-    T_Cal();
-    Rho_Cal_C();
-
-
-    //Barre de chargement
-    int i_barre;
-    int p = floor((((double)i)/((double)nb_iterations))*100);
-    printf( "[" );
-    for(i_barre=0;i_barre<=p;i_barre+=2) printf( "*" );
-    for (;i_barre<100; i_barre+=2 ) printf( "-" );
-    printf( "] %3d %%", p );
-
-    for(i_barre=0;i_barre<59;++i_barre) printf( "%c", 8 );
-
-    fflush(stdout );
-
-  }
 
   if(_save_points_file != "non")
-  {
-    //On referme les flux qu'on a ouvert
-    for (int i=0; i<2*_number_saved_points; i++)
     {
-      mes_flux[i]->close();
+      flux_pts->close();
     }
-  }
 
   printf( "\n" );
+  delete flux_pts;
 
 }
 
@@ -1136,23 +1043,12 @@ void EC_PyrolyseMC::IterativeSolver (int nb_iterations)
   //ConjugateGradient <SparseMatrix<double> > solver;
   BiCGSTAB <SparseMatrix<double> > solver;
 
-  vector< shared_ptr<ofstream> > mes_flux;
+  ofstream* flux_pts(new ofstream);
 
   if(_save_points_file != "non")
   {
     //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
-    for (int i=0; i<_number_saved_points; i++)
-    {
-      shared_ptr<ofstream> flux(new ofstream);
-      flux->open(_save_points_file+"/T_"+to_string(i), ios::out);
-      mes_flux.push_back(flux);
-    }
-    for (int i=0; i<_number_saved_points; i++)
-    {
-      shared_ptr<ofstream> flux(new ofstream);
-      flux->open(_save_points_file+"/R_"+to_string(i), ios::out);
-      mes_flux.push_back(flux);
-    }
+   flux_pts->open(_save_points_file+".txt", ios::out);
   }
 
   for( int i=0 ; i<=nb_iterations ; i++)
@@ -1166,28 +1062,14 @@ void EC_PyrolyseMC::IterativeSolver (int nb_iterations)
 
     if (_save_points_file != "non")
     {
-      char* truc = new char;
+      *flux_pts<<i*_deltaT<<" ";
+      //char* truc = new char;
       for (int j=0; j<_number_saved_points; j++)
       {
-        double truc_b1, truc_b2, truc_b3;
-        truc_b1 = i*_deltaT;
         int pos = floor(_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y);
-        truc_b2 = _sol_T(pos) ;
-        truc_b3 = _sol_R(pos) ;
-        sprintf(truc, "%f  %f", truc_b1, truc_b2);
-        mes_flux[j]->write(truc,16);
-        mes_flux[j]->write("\n",1);
-        sprintf(truc, "%f  %f", truc_b1, truc_b3);
-        mes_flux[j+_number_saved_points]->write(truc,16);
-        mes_flux[j+_number_saved_points]->write("\n",1);
-        //Bon alors je vais expliquer un peu le bordel que c'est :
-        //En gros je suis obligé de faire des pointeurs pour ouvrir un certain nombre de fichier dynamiquement
-        //Et à cause de ça je peux pas faire << comme d'hab
-        //Donc j'utilise write (qui marche avec les pointeurs mais qui est plus chiant à utiliser) et c'est pour ça que c'est dégueu
-        //Mais en gros ça marche comme ça (d'après ce que j'ai pigé) :
-        //Tu utilise sprintf pour transformer tes nombres en des chaine de charactères puis write pour l'écrire dans ton fichier
-        //Voilà. (Si vous avez besoin d'y retoucher demander moi avant svp)
+	*flux_pts<<_sol_T(pos)<<" "<<_sol_R(pos)<<" ";
       }
+      *flux_pts<<endl;
     }
     //-------------------------------------------------------------------
 
@@ -1221,11 +1103,12 @@ void EC_PyrolyseMC::IterativeSolver (int nb_iterations)
   if(_save_points_file != "non")
   {
     //On referme les flux qu'on a ouvert
-    for (int i=0; i<2*_number_saved_points; i++)
-    {
-      mes_flux[i]->close();
-    }
+    flux_pts->close();
   }
+
+
+  delete flux_pts;
+  printf("\n");
 
 }
 
