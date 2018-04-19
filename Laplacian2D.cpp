@@ -1009,7 +1009,7 @@ void EC_PyrolyseMC::Advance(int nb_iterations)
 	}
 
       Rho_Cal_P();
-      if (CL_gauche == "Neumann_non_constant")
+      if (_CL_gauche == "Neumann_non_constant")
       {
         Laplacian2D::UpdateCL(i+1);
       }
