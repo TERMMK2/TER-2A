@@ -84,10 +84,8 @@ void Laplacian2D::Initialize(DataFile data_file)
       system(("mkdir -p ./"+_save_all_file).c_str());
     }
 
-  
+
 }
-
-
 
 void Laplacian2D::UpdateCL(int num_it)
 {
@@ -102,22 +100,8 @@ void Laplacian2D::UpdateCL(int num_it)
   }
 }
 
-
-
 void Laplacian2D::InitializeMatrix()
 {
-  _x.resize(_Nx);
-  _y.resize(_Ny);
-  for (int j =0; j < _Nx ; j++)
-  {
-    _x(j) = _x_min + j*_h_x;
-  }
-
-  for (int i = 0; i < _Ny ; i++)
-  {
-    _y(i) = _y_min + i*_h_y;
-  }
-
   _LapMat.resize(_Nx*_Ny,_Nx*_Ny);
 
   double alpha = 1 + 2*_a*_deltaT/(_h_x*_h_x) + 2*_a*_deltaT/(_h_y*_h_y);
@@ -189,10 +173,7 @@ void EC_ClassiqueP::InitializeMatrix()
   }
 }
 
-// Faire quelque chose pour fusionner les solveur c'est moche comme ça
-
-
-void EC_ClassiqueM::DirectSolver (int nb_iterations) //il reste un petit truc à régler la dedans mais (normalement) ça devrait être rapide
+void EC_ClassiqueM::DirectSolver (int nb_iterations)
 {
   SimplicialLLT <SparseMatrix<double> > solver;
   solver.compute(_LapMat);
@@ -300,9 +281,8 @@ void EC_ClassiqueP::DirectSolver (int nb_iterations)
     }
 
   delete flux_pts;
-  
-}
 
+}
 
 void EC_ClassiqueM::IterativeSolver (int nb_iterations)
 {
@@ -356,7 +336,7 @@ void EC_ClassiqueM::IterativeSolver (int nb_iterations)
     }
 
   delete flux_pts;
-  
+
 }
 
 void EC_ClassiqueP::IterativeSolver (int nb_iterations)
@@ -393,7 +373,7 @@ void EC_ClassiqueP::IterativeSolver (int nb_iterations)
 	    }
 	  *flux_pts<<endl;
 	}
-    
+
       //-------------------------------------------------------------------
 
       EC_ClassiqueP::ConditionsLimites(i);
@@ -411,11 +391,8 @@ void EC_ClassiqueP::IterativeSolver (int nb_iterations)
       flux_pts->close();
     }
   delete flux_pts;
-  
+
 }
-
-
-
 
 void Laplacian2D::SaveSol(string name_file)
 {
@@ -609,14 +586,9 @@ void EC_ClassiqueP::ConditionsLimites(int num_it)
   }
 }
 
-
-
 //-------------------------------------------------------------------------------------------------------------------------
 //Début de EC_Pyrolyse:
 //-------------------------------------------------------------------------------------------------------------------------
-
-
-
 
 void EC_PyrolyseMC::Initialize(DataFile data_file)
 {
@@ -654,18 +626,6 @@ void EC_PyrolyseMC::Initialize(DataFile data_file)
 
 void EC_PyrolyseMC::InitializeMatrix()
 {
-  _x.resize(_Nx);
-  _y.resize(_Ny);
-  for (int j =0; j < _Nx ; j++)
-  {
-    _x(j) = _x_min + j*_h_x;
-  }
-
-  for (int i = 0; i < _Ny ; i++)
-  {
-    _y(i) = _y_min + i*_h_y;
-  }
-
   _LapMat.resize(_Nx*_Ny,_Nx*_Ny);
 
   Eigen::VectorXd alpha;
@@ -698,13 +658,13 @@ void EC_PyrolyseMC::InitializeMatrix()
     if ((i+1)%_Nx!=0)
     {
       liste_elem.push_back({i,i+1,beta[i]});
-      liste_elem.push_back({i+1,i,beta[i]});
+      liste_elem.push_back({i+1,i,beta[i+1]});
     }
   }
   for (int i = 0 ; i<_Nx*(_Ny-1) ; i++)
   {
     liste_elem.push_back({i,_Nx+i,gamma[i]});
-    liste_elem.push_back({_Nx+i,i,gamma[i]});
+    liste_elem.push_back({_Nx+i,i,gamma[_Nx+i]});
   }
 
   _LapMat.setFromTriplets(liste_elem.begin(), liste_elem.end());
@@ -743,7 +703,6 @@ void EC_PyrolyseMC::InitializeMatrix()
      }
    }
 }
-
 
 void EC_PyrolyseMC::Flux_Cal(int i, int j)
 {
@@ -847,7 +806,6 @@ void EC_PyrolyseMC::Flux_Cal(int i, int j)
     }
 }
 
-
 void EC_PyrolyseMC::Rho_Cal_P()
 {
   double k;
@@ -869,7 +827,6 @@ void EC_PyrolyseMC::Rho_Cal_P()
     }
 }
 
-
 void EC_PyrolyseMC::Rho_Cal_C()
 {
   double k;
@@ -890,7 +847,6 @@ void EC_PyrolyseMC::Rho_Cal_C()
       _sol_R[i] = (_sol_R[i]-_rho_p)*exp(k*C[i]*_deltaT) + _rho_p;
     }
 }
-
 
 void EC_PyrolyseMC::T_Cal()
 {
@@ -919,7 +875,6 @@ void EC_PyrolyseMC::T_Cal()
 
 
 }
-
 
 void EC_PyrolyseMC::SaveSol(int iteration)
 {
@@ -974,67 +929,66 @@ void EC_PyrolyseMC::SaveSol(int iteration)
   mon_flux.close();
 }
 
-
 void EC_PyrolyseMC::Advance(int nb_iterations)
 {
 
   ofstream* flux_pts(new ofstream);
 
-  
+
   if(_save_points_file != "non")
-    {
-      //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
-      flux_pts->open(_save_points_file+".txt", ios::out);
-    
-    }
+  {
+    //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
+    flux_pts->open(_save_points_file+".txt", ios::out);
+
+  }
 
   for( int i=0 ; i<=nb_iterations ; i++)
+  {
+    // Systeme de sauvegarde de points :---------------------------------
+    if (_save_all_file != "non")
     {
-      // Systeme de sauvegarde de points :---------------------------------
-      if (_save_all_file != "non")
-	{
-	  EC_PyrolyseMC::SaveSol(i);
-	}
-
-      if (_save_points_file != "non")
-	{
-	  *flux_pts<<i*_deltaT<<" ";
-	  //char* truc = new char;
-	  for (int j=0; j<_number_saved_points; j++)
-	    {
-	      int pos = floor(_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y);
-	      *flux_pts<<_sol_T(pos)<<" "<<_sol_R(pos)<<" ";
-	    }
-	  *flux_pts<<endl;
-	}
-
-      Rho_Cal_P();
-      if (_CL_gauche == "Neumann_non_constant")
-      {
-        Laplacian2D::UpdateCL(i+1);
-      }
-      T_Cal();
-      Rho_Cal_C();
-
-
-      //Barre de chargement
-      int i_barre;
-      int p = floor((((double)i)/((double)nb_iterations))*100);
-      printf( "[" );
-      for(i_barre=0;i_barre<=p;i_barre+=2) printf( "*" );
-      for (;i_barre<100; i_barre+=2 ) printf( "-" );
-      printf( "] %3d %%", p );
-
-      for(i_barre=0;i_barre<59;++i_barre) printf( "%c", 8 );
-
-      fflush(stdout );
-
+      EC_PyrolyseMC::SaveSol(i);
     }
+
+    if (_save_points_file != "non")
+    {
+      *flux_pts<<i*_deltaT<<" ";
+      //char* truc = new char;
+      for (int j=0; j<_number_saved_points; j++)
+      {
+        int pos = floor(_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y);
+        *flux_pts<<_sol_T(pos)<<" "<<_sol_R(pos)<<" ";
+      }
+      *flux_pts<<endl;
+    }
+
+    Rho_Cal_P();
+    if (_CL_gauche == "Neumann_non_constant")
+    {
+      Laplacian2D::UpdateCL(i+1);
+    }
+    T_Cal();
+    Rho_Cal_C();
+
+
+    //Barre de chargement
+    int i_barre;
+    int p = floor((((double)i)/((double)nb_iterations))*100);
+    printf( "[" );
+    for(i_barre=0;i_barre<=p;i_barre+=2) printf( "*" );
+    for (;i_barre<100; i_barre+=2 ) printf( "-" );
+    printf( "] %3d %%", p );
+
+    for(i_barre=0;i_barre<59;++i_barre) printf( "%c", 8 );
+
+    fflush(stdout );
+
+  }
 
   if(_save_points_file != "non")
-    {
-      flux_pts->close();
-    }
+  {
+    flux_pts->close();
+  }
 
   printf( "\n" );
   delete flux_pts;
@@ -1086,8 +1040,9 @@ void EC_PyrolyseMC::IterativeSolver (int nb_iterations)
       _f(j) = _sol_T(j);
     }
     _sol_T = solver.solve(_f);
+    VectorXd r = _LapMat*_sol_T - _f;
     Rho_Cal_C();
-
+    // cout << "Rhotilde[14] = " << _RhoTilde[14] << " , T[14] = " << _sol_T[14] << " , Rho[14] = " << _sol_R[14] <<endl;
 
     //barre_de_chargement
 
