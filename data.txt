@@ -2,7 +2,7 @@ CL droite :
 Neumann 0
 
 CL gauche :
-Dirichlet 5000
+Neumann_non_constant 0
 
 CL haut :
 Neumann 0
@@ -11,13 +11,13 @@ CL bas :
 Neumann 0
 
 CI :
-290
+293
 
 Equation :
 EC_PyrolyseMC
 
 N_x :
-500
+1000
 
 N_y :
 2
@@ -26,22 +26,25 @@ x_min :
 0
 
 x_max :
-0.05
+0.3
 
 y_min :
 0.
 
 y_max :
-0.005
+0.05
 
 delta t :
-0.1
+0.01
 
 T final :
 100
 
 lambda :
 1.
+
+rho :
+1500
 
 rhop :
 1000.
@@ -56,20 +59,19 @@ Ta :
 6000.
 
 Cp :
-1500.
-
+1000.
 
 Solveur :
 direct
 
 Schema :
-Explicite
+tkt_bro
 
 Fichier Paraview :
-sol_1
+non
 
 Fichier sauvegarde points :
-non
+EC_PyrolyseMC_explicite
 
 Nombre de points à sauver :
 5
@@ -83,9 +85,3 @@ Points à sauver :
 
 Fichier de redemarrage :
 non
-
-
-
-
-
-
