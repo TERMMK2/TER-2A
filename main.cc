@@ -79,7 +79,15 @@ int main(int argc, char** argv)
      {
        Lap = new EC_PyrolyseMC();
        Lap->Initialize(data_file);
-       Lap->IterativeSolver(nb_iterations);
+       if (data_file.Get_Schema() == "Explicite")
+	 {
+	   Lap->IterativeSolver(nb_iterations);
+	 }
+       else if (data_file.Get_Schema() == "Explicite")
+	 {
+	   Lap->Advance(nb_iterations);
+	 }       
+
      }
 
 

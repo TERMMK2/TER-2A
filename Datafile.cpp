@@ -540,11 +540,12 @@ void DataFile::ReadDataFile()
       _Solveur = "BiCGStab";
     }
   
-  if (!_if_Schema)
+  if ((!_if_Schema) or ((_Schema != "Explicite") and (_Schema != "Implicite")))
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention, le schéma n'est pas défini (pas grave y'en a pas pour l'instant ;)" << endl;
-      _Schema = "tkt_bro";
+      cout << "Attention, vous n'avez pas rentré de schéma, ou celui que vous avez entré n'existe pas." << endl;
+      cout << "Le Schéma par défaut (Implicite) va donc être utilisé.(sert à quelque chose que pour EC_pyrolyseMC (pour l'instant)) " <<endl;
+      _Schema = "Implicite";
     }
   
   if (!_if_save_all_file)

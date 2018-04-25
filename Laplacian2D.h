@@ -15,7 +15,6 @@ class Laplacian2D // pas fini de modifier
   double _x_min, _x_max, _y_min, _y_max, _h_x, _h_y, _a, _deltaT;
   int _Nx, _Ny;
   Eigen::SparseMatrix<double> _LapMat; // matrice creuse du laplacien
-  Eigen::VectorXd _x, _y; // points de discretisation x et y
   Eigen::VectorXd _f; // vecteur source _f qui prend les données de _sol(i) pour calculer _sol(i+1)
   Eigen::VectorXd _sol; // vecteur solution U
   std::string _CL_bas, _CL_haut, _CL_gauche, _CL_droite;

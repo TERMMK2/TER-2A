@@ -63,7 +63,7 @@ Solveur :
 direct
 
 Schema :
-tkt_bro
+Explicite
 
 Fichier Paraview :
 sol_1
