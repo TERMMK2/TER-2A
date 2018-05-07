@@ -594,8 +594,6 @@ void EC_PyrolyseMC::Initialize(DataFile data_file)
 {
   Laplacian2D::Initialize(data_file);
 
-
-
   _rho_v = data_file.Get_rhov(); //1500.
   _rho_p = data_file.Get_rhop();//1000.
   _Cp = data_file.Get_Cp();//1500
@@ -997,72 +995,71 @@ void EC_PyrolyseMC::Advance(int nb_iterations)
 
 void EC_PyrolyseMC::IterativeSolver (int nb_iterations)
 {
-  //ConjugateGradient <SparseMatrix<double> > solver;
   BiCGSTAB <SparseMatrix<double> > solver;
 
   ofstream* flux_pts(new ofstream);
 
   if(_save_points_file != "non")
-  {
-    //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
-   flux_pts->open(_save_points_file+".txt", ios::out);
-  }
+    {
+      //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
+      flux_pts->open(_save_points_file+".txt", ios::out);
+    }
 
   for( int i=0 ; i<=nb_iterations ; i++)
-  {
-
-    // Systeme de sauvegarde de points :---------------------------------
-    if (_save_all_file != "non")
     {
-      EC_PyrolyseMC::SaveSol(i);
+
+      // Systeme de sauvegarde de points :---------------------------------
+      if (_save_all_file != "non")
+	{
+	  EC_PyrolyseMC::SaveSol(i);
+	}
+
+      if (_save_points_file != "non")
+	{
+	  *flux_pts<<i*_deltaT<<" ";
+	  //char* truc = new char;
+	  for (int j=0; j<_number_saved_points; j++)
+	    {
+	      int pos = floor(_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y);
+	      *flux_pts<<_sol_T(pos)<<" "<<_sol_R(pos)<<" ";
+	    }
+	  *flux_pts<<endl;
+	}
+      //-------------------------------------------------------------------
+
+      Rho_Cal_P();
+      EC_PyrolyseMC::InitializeMatrix();
+      solver.compute(_LapMat);
+      EC_PyrolyseMC::ConditionsLimites(i);
+      _f.resize(_Nx*_Ny);
+      for (int j =0; j<_Nx*_Ny ; j++)
+	{
+	  _f(j) = _sol_T(j);
+	}
+      _sol_T = solver.solve(_f);
+      VectorXd r = _LapMat*_sol_T - _f;
+      Rho_Cal_C();
+      // cout << "Rhotilde[14] = " << _RhoTilde[14] << " , T[14] = " << _sol_T[14] << " , Rho[14] = " << _sol_R[14] <<endl;
+
+      //barre_de_chargement
+
+      int i_barre;
+      int p = floor((((double)i)/((double)nb_iterations))*100);
+      printf( "[" );
+      for(i_barre=0;i_barre<=p;i_barre+=2) printf( "*" );
+      for (;i_barre<100; i_barre+=2 ) printf( "-" );
+      printf( "] %3d %%", p );
+
+      for(i_barre=0;i_barre<59;++i_barre) printf( "%c", 8 );
+
+      fflush(stdout );
     }
-
-    if (_save_points_file != "non")
-    {
-      *flux_pts<<i*_deltaT<<" ";
-      //char* truc = new char;
-      for (int j=0; j<_number_saved_points; j++)
-      {
-        int pos = floor(_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y);
-	*flux_pts<<_sol_T(pos)<<" "<<_sol_R(pos)<<" ";
-      }
-      *flux_pts<<endl;
-    }
-    //-------------------------------------------------------------------
-
-    Rho_Cal_P();
-    EC_PyrolyseMC::InitializeMatrix();
-    solver.compute(_LapMat);
-    EC_PyrolyseMC::ConditionsLimites(i);
-    _f.resize(_Nx*_Ny);
-    for (int j =0; j<_Nx*_Ny ; j++)
-    {
-      _f(j) = _sol_T(j);
-    }
-    _sol_T = solver.solve(_f);
-    VectorXd r = _LapMat*_sol_T - _f;
-    Rho_Cal_C();
-    // cout << "Rhotilde[14] = " << _RhoTilde[14] << " , T[14] = " << _sol_T[14] << " , Rho[14] = " << _sol_R[14] <<endl;
-
-    //barre_de_chargement
-
-    int i_barre;
-    int p = floor((((double)i)/((double)nb_iterations))*100);
-    printf( "[" );
-    for(i_barre=0;i_barre<=p;i_barre+=2) printf( "*" );
-    for (;i_barre<100; i_barre+=2 ) printf( "-" );
-    printf( "] %3d %%", p );
-
-    for(i_barre=0;i_barre<59;++i_barre) printf( "%c", 8 );
-
-    fflush(stdout );
-  }
 
   if(_save_points_file != "non")
-  {
-    //On referme les flux qu'on a ouvert
-    flux_pts->close();
-  }
+    {
+      //On referme les flux qu'on a ouvert
+      flux_pts->close();
+    }
 
 
   delete flux_pts;
@@ -1088,72 +1085,175 @@ void EC_PyrolyseMC::ConditionsLimites(int num_it)
     }
 
   if (_CL_haut == "Dirichlet") //Condition de température en haut
-  {
-    for (int j = 0; j < _Nx ; j++)
     {
-      _sol_T(j) = _sol_T(j)-gamma(j)*_Val_CL_haut;
+      for (int j = 0; j < _Nx ; j++)
+	{
+	  _sol_T(j) = _sol_T(j)-gamma(j)*_Val_CL_haut;
+	}
     }
-  }
   if (_CL_bas == "Dirichlet") //Condition de température en bas
-  {
-    for (int j = 0; j < _Nx ; j++)
     {
-      _sol_T(_Nx*(_Ny -1)+ j) = _sol_T(_Nx*(_Ny -1)+ j)-gamma(_Nx*(_Ny -1)+ j)*_Val_CL_bas;
+      for (int j = 0; j < _Nx ; j++)
+	{
+	  _sol_T(_Nx*(_Ny -1)+ j) = _sol_T(_Nx*(_Ny -1)+ j)-gamma(_Nx*(_Ny -1)+ j)*_Val_CL_bas;
+	}
     }
-  }
 
   if (_CL_gauche == "Dirichlet")  //Condition de température à gauche
-  {
-    for (int i = 0; i < _Ny; i++)
     {
-      _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche;
+      for (int i = 0; i < _Ny; i++)
+	{
+	  _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche;
+	}
     }
-  }
   if (_CL_droite == "Dirichlet") //Condition de température à droite
-  {
-    for (int i = 0; i < _Ny; i++)
     {
-      _sol_T((i+1)*_Nx - 1) = _sol_T((i+1)*_Nx - 1)-beta((i+1)*_Nx - 1)*_Val_CL_droite;
+      for (int i = 0; i < _Ny; i++)
+	{
+	  _sol_T((i+1)*_Nx - 1) = _sol_T((i+1)*_Nx - 1)-beta((i+1)*_Nx - 1)*_Val_CL_droite;
+	}
     }
-  }
 
-    if (_CL_haut == "Neumann") //Condition de flux en haut
-  {
-    for (int j = 0; j < _Nx ; j++)
+  if (_CL_haut == "Neumann") //Condition de flux en haut
     {
-      _sol_T(j) = _sol_T(j)-gamma(j)*_Val_CL_haut*_h_y;
+      for (int j = 0; j < _Nx ; j++)
+	{
+	  _sol_T(j) = _sol_T(j)-gamma(j)*_Val_CL_haut*_h_y;
+	}
     }
-  }
   if (_CL_bas == "Neumann") //Condition de flux en bas
-  {
-    for (int j = 0; j < _Nx ; j++)
     {
-      _sol_T(_Nx*(_Ny -1)+ j) = _sol_T(_Nx*(_Ny -1)+ j)-gamma(_Nx*(_Ny -1)+ j)*_Val_CL_bas*_h_y;
+      for (int j = 0; j < _Nx ; j++)
+	{
+	  _sol_T(_Nx*(_Ny -1)+ j) = _sol_T(_Nx*(_Ny -1)+ j)-gamma(_Nx*(_Ny -1)+ j)*_Val_CL_bas*_h_y;
+	}
     }
-  }
 
   if (_CL_gauche == "Neumann")  //Condition de flux à gauche
-  {
-    for (int i = 0; i < _Ny; i++)
     {
-      _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche*_h_x;
+      for (int i = 0; i < _Ny; i++)
+	{
+	  _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche*_h_x;
+	}
     }
-  }
 
   if (_CL_gauche == "Neumann_non_constant")  //Condition de flux à gauche
-  {
-    Laplacian2D::UpdateCL(num_it);
-    for (int i = 0; i < _Ny; i++)
     {
-      _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche*_h_x;
+      Laplacian2D::UpdateCL(num_it);
+      for (int i = 0; i < _Ny; i++)
+	{
+	  _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche*_h_x;
+	}
     }
-  }
 
   if (_CL_droite == "Neumann") //Condition de flux à droite
-  {
-    for (int i = 0; i < _Ny; i++)
     {
-      _sol_T((i+1)*_Nx - 1) = _sol_T((i+1)*_Nx - 1)-beta((i+1)*_Nx - 1)*_Val_CL_droite*_h_x;
+      for (int i = 0; i < _Ny; i++)
+	{
+	  _sol_T((i+1)*_Nx - 1) = _sol_T((i+1)*_Nx - 1)-beta((i+1)*_Nx - 1)*_Val_CL_droite*_h_x;
+	}
     }
+}
+
+
+
+
+void EC_PyrolyseMV::Initialize(DataFile data_file)
+{
+  EC_PyrolyseMC::Initialize(data_file);
+
+  _lambdaMV.resize(_Nx*_Ny);
+  _Cpp = data_file.Get_Cpp();
+  _Cpv = data_file.Get_Cpv();
+
+  // Si on fait un truc en explicite mettre la cfl ici.
+
+}
+  
+
+
+//-----------------------------------------------------------------------------------
+//Pyrolyse Materiau variable
+//-----------------------------------------------------------------------------------
+
+
+
+
+void EC_PyrolyseMV::lambda_Cal() // On calcule Lambda à partir de _RhoTilde et de _sol_T
+{
+  double lv; //Lambda vierge
+  double lp; //Lambda pyrolysé
+  double ksi;
+  for {int i=0; i<_Nx*_Ny; i++}
+  {
+    if (_sol_T(i) < 1000)
+      {
+	lv = -0.5/728.*_sol_T(i) + 1;
+	lp = 1./728.*_sol_T(i) + 1;
+      }
+    else
+      {
+	lv = 0.5;
+	lp = 2.;
+      }
+    ksi = (_rho_v - _RhoTilde(i))/(_rho_v - _rho_p);
+    _lambdaMV(i) = (1-ksi)*lv + ksi*lp;
   }
+}
+
+
+
+EC_PyrolyseMV::IterativeSolver(int nb_iterations)
+{
+  BiCGSTAB <SparseMatrix<double> > solver;
+
+  ofstream* flux_pts(new ofstream);
+
+  if(_save_points_file != "non")
+    {
+      //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
+      flux_pts->open(_save_points_file+".txt", ios::out);
+    }
+
+  for( int i=0 ; i<=nb_iterations ; i++)
+    {
+      // Systeme de sauvegarde de points :---------------------------------
+      if (_save_all_file != "non")
+	{
+	  EC_PyrolyseMC::SaveSol(i);
+	}
+
+      if (_save_points_file != "non")
+	{
+	  *flux_pts<<i*_deltaT<<" ";
+	  //char* truc = new char;
+	  for (int j=0; j<_number_saved_points; j++)
+	    {
+	      int pos = floor(_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y);
+	      *flux_pts<<_sol_T(pos)<<" "<<_sol_R(pos)<<" ";
+	    }
+	  *flux_pts<<endl;
+	}
+      //-------------------------------------------------------------------
+
+      Rho_Cal_P();
+      EC_PyrolyseMV::InitializeMatrix();
+      solver.compute(_LapMat);
+      EC_PyrolyseMV::ConditionsLimites(i);
+      _f.resize(_Nx*_Ny);
+      for (int j =0; j<_Nx*_Ny ; j++)
+	{
+	  _f(j) = _sol_T(j);
+	}
+
+
+      //---------------------------Newton-----------------------------------
+
+      while(
+      
+
+
+    }
+
+
 }

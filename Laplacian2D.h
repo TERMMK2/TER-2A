@@ -81,10 +81,24 @@ class EC_PyrolyseMC : public Laplacian2D //Schéma équation correction à maté
   void Rho_Cal_C(); //Calcul de _sol_R (correction)
   void T_Cal(); //Calcul de T si Cp est CONSTANT
   void Advance(int nb_iterations);
-  void AdvanceMatrix(int i, int j);
   void IterativeSolver(int nb_iterations);
   void ConditionsLimites(int num_it);
 
   inline void DirectSolver(int nb_iterations){};
+  
+};
+
+class EC_pyrolyseMV : public EC_pyrolyseMC
+{
+ private :
+  vector<double> _lambdaMV;
+  double Cpp,Cpv;
+
+ public :
+  void Initialize (DataFile datafile);
+  void lambda_Cal();
+  void InitializeMatrix();
+  void IterativeSolver(int nb_iterations);
+
 
 };
