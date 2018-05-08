@@ -66,6 +66,26 @@ int main(int argc, char** argv)
       abort();
     }
   }
+  if (data_file.Get_eq() == "EC_PyrolyseMV")
+  {
+    Lap = new EC_PyrolyseMV();
+    Lap->Initialize(data_file);
+    if (data_file.Get_Schema() == "Implicite")
+    {
+      Lap->IterativeSolver(nb_iterations);
+    }
+    else if (data_file.Get_Schema() == "Explicite")
+    {
+      cout << "Explicite n'est pas encore codé tête de gland" << endl;
+      abort();
+      // Lap->Advance(nb_iterations);
+    }
+    else
+    {
+      cout << "Ecrire Explicite ou Implicite pour le schéma" << endl;
+      abort();
+    }
+  }
   return 0;
 }
 

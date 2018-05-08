@@ -101,4 +101,5 @@ class EC_PyrolyseMV : public EC_PyrolyseMC
   void InitializeMatrix();
   void IterativeSolver(int nb_iterations);
   void ConditionsLimites(int num_it);
+  void Newton(double epsilon);
 };

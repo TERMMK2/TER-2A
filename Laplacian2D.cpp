@@ -1200,8 +1200,6 @@ void EC_PyrolyseMV::Cp_Cal() // On calcule Lambda à partir de _RhoTilde et de _
 
 void EC_PyrolyseMV::IterativeSolver(int nb_iterations)
 {
-  BiCGSTAB <SparseMatrix<double> > solver;
-
   ofstream* flux_pts(new ofstream);
 
   if(_save_points_file != "non")
@@ -1234,19 +1232,9 @@ void EC_PyrolyseMV::IterativeSolver(int nb_iterations)
     Rho_Cal_P();
     Cp_Cal();
     EC_PyrolyseMV::InitializeMatrix();
-    solver.compute(_LapMat);
     EC_PyrolyseMV::ConditionsLimites(i);
-    _f.resize(_Nx*_Ny);
-    for (int j =0; j<_Nx*_Ny ; j++)
-    {
-      _f(j) = _sol_T(j);
-    }
-
-
-    //---------------------------Newton-----------------------------------
-
-
-
+    double epsilon = 1e-6;
+    EC_PyrolyseMV::Newton(epsilon);
   }
 }
 
@@ -1445,4 +1433,27 @@ void EC_PyrolyseMV::InitializeMatrix()
        _LapMat.coeffRef((_Ny - 1)* _Nx + i , (_Ny - 1)* _Nx + i) += gamma_b[(_Ny - 1)* _Nx + i]; //Bord bas
      }
    }
+}
+
+void EC_PyrolyseMV::Newton(double epsilon)
+{
+  BiCGSTAB <SparseMatrix<double> > solver;
+  solver.compute(_LapMat); //On définit la jacobienne égale à Lapmat (approximation assez sale mais soit)
+  _f.resize(_Nx*_Ny);
+  VectorXd xk, C, G;
+  xk = _sol_T;
+  for (int i = 0; i < _Nx*_Ny; i++)
+  {
+    C[i] = _RhoTilde[i]*_CpMV[i]*_sol_T[i]/_deltaT;
+  }
+  G = _LapMat*xk - C;
+  double residu = G.norm();
+  while (residu <= epsilon)
+  {
+    _f = solver.solve(-G);
+    xk += _f;
+    G = _LapMat*xk - C;
+    residu = G.norm();
+  }
+  _sol_T = xk;
 }
