@@ -1,4 +1,4 @@
-#ifndef FILE_DATA_FILE_CPP //ça compile et tout mais j'ai pas l'impression que tout marche parfaitement il faudrait reprendre les trucs 
+#ifndef FILE_DATA_FILE_CPP //ça compile et tout mais j'ai pas l'impression que tout marche parfaitement il faudrait reprendre les trucs
 
 #include "Datafile.h"
 #include <fstream>
@@ -12,21 +12,21 @@ using namespace Eigen;
 
 DataFile::DataFile(string file_name)
   : _file_name(file_name), _if_CL_droite(false), _if_CL_gauche(false), _if_CL_haut(false), _if_CL_bas(false),
-    _if_Val_CL_droite(false), _if_Val_CL_gauche(false), _if_Val_CL_haut(false), _if_Val_CL_bas(false), 
-    _if_CI(false), 
-    _if_eq(false), 
-    _if_N_x(false), _if_N_y(false), 
-    _if_x_min(false), _if_x_max(false), _if_y_min(false), _if_y_max(false), 
+    _if_Val_CL_droite(false), _if_Val_CL_gauche(false), _if_Val_CL_haut(false), _if_Val_CL_bas(false),
+    _if_CI(false),
+    _if_eq(false),
+    _if_N_x(false), _if_N_y(false),
+    _if_x_min(false), _if_x_max(false), _if_y_min(false), _if_y_max(false),
     _if_deltaT(false), _if_T_final(false),
-    _if_lambda(false), _if_lambdap(false), _if_lambdav(false), 
+    _if_lambda(false), _if_lambdap(false), _if_lambdav(false),
     _if_rho(false), _if_rhop(false), _if_rhov(false),
-  _if_Cp(false), _if_Cpp(false), _if_Cpv(false),  
+  _if_Cp(false), _if_Cpp(false), _if_Cpv(false),
   _if_Aexp(false), _if_Ta(false),
-  _if_Solveur(false), 
-  _if_Schema(false), 
-  _if_save_all_file(false), 
+  _if_Solveur(false),
+  _if_Schema(false),
+  _if_save_all_file(false),
   _if_save_points_file(false), _if_number_saved_points(false), _if_saved_points(false),
-  _if_restart_file(false) 
+  _if_restart_file(false)
 {}
 
 
@@ -45,9 +45,9 @@ void DataFile::ReadDataFile()
       cout << "--------------------------------------------------" << endl;
       cout << "Reading data file " << _file_name << endl;
     }
-  
-  string file_line; 
-  
+
+  string file_line;
+
   string truc;
   size_t taille;
   char carac;
@@ -75,12 +75,12 @@ void DataFile::ReadDataFile()
 	    {
 	      data_file.seekg(-taille,ios::cur);
 	    }
-	  
+
 	}
 
 
       if (file_line.find("CL gauche :") != std::string::npos)
-	{ 
+	{
 	  data_file >> _CL_gauche; _if_CL_gauche = true;
 	  if (_CL_gauche != "Neumann_non_constant")
 	    {
@@ -138,17 +138,17 @@ void DataFile::ReadDataFile()
 	    {data_file.seekg(-taille,ios::cur);}
 	}
 
-      
+
       if (file_line.find("CI :") != std::string::npos)
 	{
 	  data_file >> _CI; _if_CI = true;
 	}
-      
+
       if (file_line.find("Equation :") != std::string::npos)
       	{
       	  data_file >> _eq; _if_eq = true;
       	}
-      
+
 
       if (file_line.find("N_x :") != std::string::npos)
 	{
@@ -239,7 +239,7 @@ void DataFile::ReadDataFile()
 	  data_file >> _Ta; _if_Ta = true;
 	}
 
-      
+
       if (file_line.find("Solveur :") != std::string::npos)
 	{
 	  data_file >> _Solveur; _if_Solveur = true;
@@ -248,13 +248,13 @@ void DataFile::ReadDataFile()
 	{
 	  data_file >> _Schema; _if_Schema = true;
 	}
-      
+
 
       if (file_line.find("Fichier Paraview :") != std::string::npos)
 	{
 	  data_file >> _save_all_file; _if_save_all_file = true;
 	}
-      
+
       if (file_line.find("Fichier sauvegarde points :") != std::string::npos)
 	{
 	  data_file >> _save_points_file; _if_save_points_file = true;
@@ -263,15 +263,15 @@ void DataFile::ReadDataFile()
 	{
 	  data_file >> _number_saved_points; _if_number_saved_points = true;
 	  _saved_points.resize(_number_saved_points);
-	  for (int i = 0 ; i<_number_saved_points; i++) 
+	  for (int i = 0 ; i<_number_saved_points; i++)
 	    { _saved_points[i].resize(2);  }
 	}
       if (file_line.find("Points à sauver :") != std::string::npos)
 	{
 	  int i =0;
 	  bool test = true;
-	  
-	  while ((i<2*_number_saved_points) and (test)) 
+
+	  while ((i<2*_number_saved_points) and (test))
 	    {
 	      data_file >> truc;
 	      taille = truc.size();
@@ -279,12 +279,12 @@ void DataFile::ReadDataFile()
 	      data_file.get(carac);
 	      data_file.seekg(-1,ios::cur);
 	      if ((carac == '1') or (carac == '2') or (carac == '3') or (carac == '4') or (carac == '5') or (carac == '6') or  (carac == '7') or (carac == '8') or (carac == '9') or (carac == '0'))
-		{  
+		{
 		  _saved_points[i/2][i%2] = atof(truc.c_str());
 		  data_file.seekg(taille,ios::cur);
 		}
-	      else 
-		{ 
+	      else
+		{
 		  test = false;
 		  data_file.seekg(-(taille),ios::cur);
 		}
@@ -292,7 +292,7 @@ void DataFile::ReadDataFile()
 	    }
 	  if (test)
 	    _if_saved_points = true;
-	}  
+	}
 
       if(file_line.find("Fichier de redemarrage :") != std::string::npos)
 	{
@@ -301,7 +301,7 @@ void DataFile::ReadDataFile()
 
 
     }
-  
+
 
   // Initialisation par défaut des paramètres non fixés dans le fichier
   // Un message prévient l'utilisateur
@@ -330,9 +330,9 @@ void DataFile::ReadDataFile()
       cout << "Attention la valeur par défaut pour la CL bas (Neumann) est utilisé." << endl;
       _CL_bas = "Neumann";
     }
-  
 
-  
+
+
   if (!_if_Val_CL_droite)
     {
       if (_CL_droite =="Neumann")
@@ -395,15 +395,15 @@ void DataFile::ReadDataFile()
     }
 
 
-  
+
   if (!_if_CI)
     {
       cout << "---------------------------------------------------" << endl;
       cout << "Attention, la valeur par défaut pour la CI (293) est utilisé. " << endl;
-      _CI = 293;      
+      _CI = 293;
     }
 
-  if ((!_if_eq) or ((_eq != "EC_ClassiqueM") and (_eq != "EC_ClassiqueP") and (_eq != "EC_PyrolyseMC")))
+  if ((!_if_eq) or ((_eq != "EC_ClassiqueM") and (_eq != "EC_ClassiqueP") and (_eq != "EC_PyrolyseMC") and (_eq != "EC_PyrolyseMV")))
     {
       cout << "---------------------------------------------------" << endl;
       cout << "Attention, vous n'avez pas entré d'équation ou celle que vous avez choisie n'existe pas." <<endl;
@@ -412,7 +412,7 @@ void DataFile::ReadDataFile()
     }
 
 
-  
+
   if (!_if_N_x)
     {
       cout << "---------------------------------------------------" << endl;
@@ -465,7 +465,7 @@ void DataFile::ReadDataFile()
   //----------------------------------------------------------------------
   //Rajouter plus tard les trucs par défaut pour pour la pyrolyse avec lambda variable et Cp variable pour lambda, rho et Cp
   //Rajouter aussi les valeurs par défault pour lambdap, lambdav, Cpp et Cpv.
-  //A faire avant de faire marcher le code 
+  //A faire avant de faire marcher le code
   //----------------------------------------------------------------------
 
 
@@ -491,6 +491,20 @@ void DataFile::ReadDataFile()
       _rhov = 1500.;
     }
 
+  if ((!_if_Cpp) and (_eq =="EC_PyrolyseMV"))//truc à faire pour la pyro plus compliquée
+    {
+      cout << "---------------------------------------------------" << endl;
+      cout << "Attention, le Cpp par défaut est utilisé (1500.).-" << endl;
+      _Cpp = 1500.;
+    }
+
+  if ((!_if_Cpv) and (_eq =="EC_PyrolyseMV"))//truc à faire pour la pyro plus compliquée
+    {
+      cout << "---------------------------------------------------" << endl;
+      cout << "Attention, le Cpv par défaut est utilisé (1500.).-" << endl;
+      _Cpv = 1000.;
+    }
+
 
 
   if ((!_if_rho) and ((_eq =="EC_ClassiqueM")or(_eq =="EC_ClassiqueP")))
@@ -508,14 +522,14 @@ void DataFile::ReadDataFile()
       _Cp = 1500.;
     }
 
-  
+
   if ((!_if_Aexp) and (_eq == "EC_PyrolyseMC"))
     {
       cout << "---------------------------------------------------" << endl;
       cout << "Attention, le facteur préexponentiel par défaut est utilisé (1000.).-" << endl;
       _Aexp = 1000.;
     }
-  
+
   if ((!_if_Ta) and (_eq == "EC_PyrolyseMC"))
     {
       cout << "---------------------------------------------------" << endl;
@@ -524,14 +538,14 @@ void DataFile::ReadDataFile()
     }
 
 
-  
+
   if (!_if_Solveur)
     {
       cout << "--------------------------------------------------" << endl;
       cout << "Attention, le solveur par défaut (BiCGStab) est utilisé." << endl;
       _Solveur = "BiCGStab";
     }
-  
+
   if ((_if_Solveur)and(_Solveur != "direct")and(_Solveur != "iterative")and(_Solveur != "BiCGStab"))
     {
       cout << "--------------------------------------------------" << endl;
@@ -539,15 +553,14 @@ void DataFile::ReadDataFile()
       cout << "Le solveur par défaut (BiCGStab) va donc etre utilisé." << endl;
       _Solveur = "BiCGStab";
     }
-  
-  if ((!_if_Schema) or ((_Schema != "Explicite") and (_Schema != "Implicite")))
+
+  if (!_if_Schema)
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention, vous n'avez pas rentré de schéma, ou celui que vous avez entré n'existe pas." << endl;
-      cout << "Le Schéma par défaut (Implicite) va donc être utilisé.(sert à quelque chose que pour EC_pyrolyseMC (pour l'instant)) " <<endl;
-      _Schema = "Implicite";
+      cout << "Attention, le schéma n'est pas défini (pas grave y'en a pas pour l'instant ;)" << endl;
+      _Schema = "tkt_bro";
     }
-  
+
   if (!_if_save_all_file)
     {
       cout << "---------------------------------------------------" << endl;
@@ -570,7 +583,7 @@ void DataFile::ReadDataFile()
       cout << "Nous n'allons donc pas sauvegarder de points-------" <<endl;
       _save_points_file = "non";
     }
-  
+
   if ((_save_points_file != "non") and (!_if_saved_points))
     {
       cout << "---------------------------------------------------" << endl;
@@ -595,7 +608,7 @@ void DataFile::ReadDataFile()
       cout << "----Erreur critique, auto-destruction en cours-----" <<endl<<endl;
       cout << "---------------------------------------------------" <<endl;
       cout << "---------------------------------------------------" <<endl<<endl<<endl;
-      
+
       cout << "Non je déconne, mais en vrai t'as pas mis de fichier de sauvegarde donctu risque pas de voir si ça a marché ou non (bon sauf si tu regarde juste si ta partie du code marche sans erreur, mais tu peux être sûr qu'il n'y a pas d'erreur si tu regarde pas la solution non ?)" <<endl<<endl;
       cout << "Bref, je vais pas faire un stop au programme parce que je sais pas le faire mais sache que si ton PC fait des calculs en se moment, ils servent à rien."<<endl;
       cout << "Sur ce mon message est fini, bonne journée à toi, jeune utilisateur quelque peu étourdi"<<endl;
@@ -623,6 +636,6 @@ void DataFile::ReadDataFile()
 }
 
 
-	
+
 #define FILE_DATA_FILE_CPP
 #endif
