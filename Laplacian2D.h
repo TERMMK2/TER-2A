@@ -64,7 +64,7 @@ class EC_ClassiqueP : public Laplacian2D //Seconde version avec une matrice qui 
 
 class EC_PyrolyseMC : public Laplacian2D //Schéma équation correction à matériau constant
 {
- private:
+  protected:
   double _FS, _FN, _FE, _FO;
   double _Cp, _Lambda, _A, _Ta;
   double _rho_v, _rho_p;
@@ -72,7 +72,7 @@ class EC_PyrolyseMC : public Laplacian2D //Schéma équation correction à maté
   Eigen::VectorXd _sol_T; //solution en température
   Eigen::VectorXd _sol_R; //solution en masse volumique
 
- public:
+  public:
   void Initialize(DataFile datafile);
   void InitializeMatrix();
   void SaveSol(int iteration);
@@ -85,20 +85,20 @@ class EC_PyrolyseMC : public Laplacian2D //Schéma équation correction à maté
   void ConditionsLimites(int num_it);
 
   inline void DirectSolver(int nb_iterations){};
-  
+
 };
 
-class EC_pyrolyseMV : public EC_pyrolyseMC
+class EC_PyrolyseMV : public EC_PyrolyseMC
 {
- private :
-  vector<double> _lambdaMV;
-  double Cpp,Cpv;
+ private:
+  Eigen::VectorXd _lambdaMV,_CpMV;
+  double _Cpp,_Cpv;
 
- public :
+ public:
   void Initialize (DataFile datafile);
   void lambda_Cal();
+  void Cp_Cal();
   void InitializeMatrix();
   void IterativeSolver(int nb_iterations);
-
-
+  void ConditionsLimites(int num_it);
 };

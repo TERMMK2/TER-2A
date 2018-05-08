@@ -1,8 +1,5 @@
 #include "Laplacian2D.h"
 
-// Demander à Motte ou il a foutu la CL chelou de la prof
-
-
 using namespace Eigen;
 using namespace std ;
 
@@ -1078,85 +1075,86 @@ void EC_PyrolyseMC::ConditionsLimites(int num_it)
   gamma.resize(_Nx*_Ny);
 
   for (int i=0;i<_Nx*_Ny;i++)
-    {
-      alpha[i] = 1 + 2*(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_x*_h_x) + 2*(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_y*_h_y);
-      beta[i] = -(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_x*_h_x);
-      gamma[i] = -(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_y*_h_y);
-    }
+  {
+    alpha[i] = 1 + 2*(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_x*_h_x) + 2*(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_y*_h_y);
+    beta[i] = -(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_x*_h_x);
+    gamma[i] = -(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_y*_h_y);
+  }
 
   if (_CL_haut == "Dirichlet") //Condition de température en haut
+  {
+    for (int j = 0; j < _Nx ; j++)
     {
-      for (int j = 0; j < _Nx ; j++)
-	{
-	  _sol_T(j) = _sol_T(j)-gamma(j)*_Val_CL_haut;
-	}
+      _sol_T(j) = _sol_T(j)-gamma(j)*_Val_CL_haut;
     }
+  }
   if (_CL_bas == "Dirichlet") //Condition de température en bas
+  {
+    for (int j = 0; j < _Nx ; j++)
     {
-      for (int j = 0; j < _Nx ; j++)
-	{
-	  _sol_T(_Nx*(_Ny -1)+ j) = _sol_T(_Nx*(_Ny -1)+ j)-gamma(_Nx*(_Ny -1)+ j)*_Val_CL_bas;
-	}
+      _sol_T(_Nx*(_Ny -1)+ j) = _sol_T(_Nx*(_Ny -1)+ j)-gamma(_Nx*(_Ny -1)+ j)*_Val_CL_bas;
     }
+  }
 
   if (_CL_gauche == "Dirichlet")  //Condition de température à gauche
+  {
+    for (int i = 0; i < _Ny; i++)
     {
-      for (int i = 0; i < _Ny; i++)
-	{
-	  _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche;
-	}
+      _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche;
     }
+  }
   if (_CL_droite == "Dirichlet") //Condition de température à droite
+  {
+    for (int i = 0; i < _Ny; i++)
     {
-      for (int i = 0; i < _Ny; i++)
-	{
-	  _sol_T((i+1)*_Nx - 1) = _sol_T((i+1)*_Nx - 1)-beta((i+1)*_Nx - 1)*_Val_CL_droite;
-	}
+      _sol_T((i+1)*_Nx - 1) = _sol_T((i+1)*_Nx - 1)-beta((i+1)*_Nx - 1)*_Val_CL_droite;
     }
+  }
 
   if (_CL_haut == "Neumann") //Condition de flux en haut
+  {
+    for (int j = 0; j < _Nx ; j++)
     {
-      for (int j = 0; j < _Nx ; j++)
-	{
-	  _sol_T(j) = _sol_T(j)-gamma(j)*_Val_CL_haut*_h_y;
-	}
+      _sol_T(j) = _sol_T(j)-gamma(j)*_Val_CL_haut*_h_y;
     }
+  }
   if (_CL_bas == "Neumann") //Condition de flux en bas
+  {
+    for (int j = 0; j < _Nx ; j++)
     {
-      for (int j = 0; j < _Nx ; j++)
-	{
-	  _sol_T(_Nx*(_Ny -1)+ j) = _sol_T(_Nx*(_Ny -1)+ j)-gamma(_Nx*(_Ny -1)+ j)*_Val_CL_bas*_h_y;
-	}
+      _sol_T(_Nx*(_Ny -1)+ j) = _sol_T(_Nx*(_Ny -1)+ j)-gamma(_Nx*(_Ny -1)+ j)*_Val_CL_bas*_h_y;
     }
+  }
 
   if (_CL_gauche == "Neumann")  //Condition de flux à gauche
+  {
+    for (int i = 0; i < _Ny; i++)
     {
-      for (int i = 0; i < _Ny; i++)
-	{
-	  _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche*_h_x;
-	}
+      _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche*_h_x;
     }
+  }
 
   if (_CL_gauche == "Neumann_non_constant")  //Condition de flux à gauche
+  {
+    Laplacian2D::UpdateCL(num_it);
+    for (int i = 0; i < _Ny; i++)
     {
-      Laplacian2D::UpdateCL(num_it);
-      for (int i = 0; i < _Ny; i++)
-	{
-	  _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche*_h_x;
-	}
+      _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche*_h_x;
     }
+  }
 
   if (_CL_droite == "Neumann") //Condition de flux à droite
+  {
+    for (int i = 0; i < _Ny; i++)
     {
-      for (int i = 0; i < _Ny; i++)
-	{
-	  _sol_T((i+1)*_Nx - 1) = _sol_T((i+1)*_Nx - 1)-beta((i+1)*_Nx - 1)*_Val_CL_droite*_h_x;
-	}
+      _sol_T((i+1)*_Nx - 1) = _sol_T((i+1)*_Nx - 1)-beta((i+1)*_Nx - 1)*_Val_CL_droite*_h_x;
     }
+  }
 }
 
-
-
+//-----------------------------------------------------------------------------------
+//Pyrolyse Materiau variable
+//-----------------------------------------------------------------------------------
 
 void EC_PyrolyseMV::Initialize(DataFile data_file)
 {
@@ -1167,93 +1165,284 @@ void EC_PyrolyseMV::Initialize(DataFile data_file)
   _Cpv = data_file.Get_Cpv();
 
   // Si on fait un truc en explicite mettre la cfl ici.
-
 }
-  
-
-
-//-----------------------------------------------------------------------------------
-//Pyrolyse Materiau variable
-//-----------------------------------------------------------------------------------
-
-
-
 
 void EC_PyrolyseMV::lambda_Cal() // On calcule Lambda à partir de _RhoTilde et de _sol_T
 {
   double lv; //Lambda vierge
   double lp; //Lambda pyrolysé
   double ksi;
-  for {int i=0; i<_Nx*_Ny; i++}
+  for (int i=0; i<_Nx*_Ny; i++)
   {
     if (_sol_T(i) < 1000)
-      {
-	lv = -0.5/728.*_sol_T(i) + 1;
-	lp = 1./728.*_sol_T(i) + 1;
-      }
+    {
+      lv = -0.5/728.*_sol_T(i) + 1;
+      lp = 1./728.*_sol_T(i) + 1;
+    }
     else
-      {
-	lv = 0.5;
-	lp = 2.;
-      }
+    {
+      lv = 0.5;
+      lp = 2.;
+    }
     ksi = (_rho_v - _RhoTilde(i))/(_rho_v - _rho_p);
     _lambdaMV(i) = (1-ksi)*lv + ksi*lp;
   }
 }
 
+void EC_PyrolyseMV::Cp_Cal() // On calcule Lambda à partir de _RhoTilde et de _sol_T
+{
+  for (int i = 0; i < _Nx*_Ny; i++)
+  {
+    double ksi = (_rho_v - _RhoTilde(i))/(_rho_v - _rho_p);
+    _CpMV(i) = (1-ksi)*_Cpv + ksi*_Cpp;
+  }
+}
 
-
-EC_PyrolyseMV::IterativeSolver(int nb_iterations)
+void EC_PyrolyseMV::IterativeSolver(int nb_iterations)
 {
   BiCGSTAB <SparseMatrix<double> > solver;
 
   ofstream* flux_pts(new ofstream);
 
   if(_save_points_file != "non")
-    {
-      //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
-      flux_pts->open(_save_points_file+".txt", ios::out);
-    }
+  {
+    //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
+    flux_pts->open(_save_points_file+".txt", ios::out);
+  }
 
   for( int i=0 ; i<=nb_iterations ; i++)
+  {
+    // Systeme de sauvegarde de points :---------------------------------
+    if (_save_all_file != "non")
     {
-      // Systeme de sauvegarde de points :---------------------------------
-      if (_save_all_file != "non")
-	{
-	  EC_PyrolyseMC::SaveSol(i);
-	}
+      EC_PyrolyseMC::SaveSol(i);
+    }
 
-      if (_save_points_file != "non")
-	{
-	  *flux_pts<<i*_deltaT<<" ";
-	  //char* truc = new char;
-	  for (int j=0; j<_number_saved_points; j++)
-	    {
-	      int pos = floor(_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y);
-	      *flux_pts<<_sol_T(pos)<<" "<<_sol_R(pos)<<" ";
-	    }
-	  *flux_pts<<endl;
-	}
-      //-------------------------------------------------------------------
+    if (_save_points_file != "non")
+    {
+      *flux_pts<<i*_deltaT<<" ";
+      //char* truc = new char;
+      for (int j=0; j<_number_saved_points; j++)
+      {
+        int pos = floor(_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y);
+        *flux_pts<<_sol_T(pos)<<" "<<_sol_R(pos)<<" ";
+      }
+      *flux_pts<<endl;
+    }
+    //-------------------------------------------------------------------
 
-      Rho_Cal_P();
-      EC_PyrolyseMV::InitializeMatrix();
-      solver.compute(_LapMat);
-      EC_PyrolyseMV::ConditionsLimites(i);
-      _f.resize(_Nx*_Ny);
-      for (int j =0; j<_Nx*_Ny ; j++)
-	{
-	  _f(j) = _sol_T(j);
-	}
-
-
-      //---------------------------Newton-----------------------------------
-
-      while(
-      
-
-
+    Rho_Cal_P();
+    Cp_Cal();
+    EC_PyrolyseMV::InitializeMatrix();
+    solver.compute(_LapMat);
+    EC_PyrolyseMV::ConditionsLimites(i);
+    _f.resize(_Nx*_Ny);
+    for (int j =0; j<_Nx*_Ny ; j++)
+    {
+      _f(j) = _sol_T(j);
     }
 
 
+    //---------------------------Newton-----------------------------------
+
+
+
+  }
+}
+
+void EC_PyrolyseMV::ConditionsLimites(int num_it)
+{
+  Eigen::VectorXd alpha;
+  Eigen::VectorXd beta;
+  Eigen::VectorXd gamma;
+
+  alpha.resize(_Nx*_Ny);
+  beta.resize(_Nx*_Ny);
+  gamma.resize(_Nx*_Ny);
+
+  for (int i=0;i<_Nx*_Ny;i++)
+  {
+    _Lambda = _lambdaMV(i);
+    alpha[i] = 1 + 2*(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_x*_h_x) + 2*(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_y*_h_y);
+    beta[i] = -(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_x*_h_x);
+    gamma[i] = -(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_y*_h_y);
+  }
+
+  if (_CL_haut == "Dirichlet") //Condition de température en haut
+  {
+    for (int j = 0; j < _Nx ; j++)
+    {
+      _sol_T(j) = _sol_T(j)-gamma(j)*_Val_CL_haut;
+    }
+  }
+  if (_CL_bas == "Dirichlet") //Condition de température en bas
+  {
+    for (int j = 0; j < _Nx ; j++)
+    {
+      _sol_T(_Nx*(_Ny -1)+ j) = _sol_T(_Nx*(_Ny -1)+ j)-gamma(_Nx*(_Ny -1)+ j)*_Val_CL_bas;
+    }
+  }
+
+  if (_CL_gauche == "Dirichlet")  //Condition de température à gauche
+  {
+    for (int i = 0; i < _Ny; i++)
+    {
+      _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche;
+    }
+  }
+  if (_CL_droite == "Dirichlet") //Condition de température à droite
+  {
+    for (int i = 0; i < _Ny; i++)
+    {
+      _sol_T((i+1)*_Nx - 1) = _sol_T((i+1)*_Nx - 1)-beta((i+1)*_Nx - 1)*_Val_CL_droite;
+    }
+  }
+
+  if (_CL_haut == "Neumann") //Condition de flux en haut
+  {
+    for (int j = 0; j < _Nx ; j++)
+    {
+      _sol_T(j) = _sol_T(j)-gamma(j)*_Val_CL_haut*_h_y;
+    }
+  }
+  if (_CL_bas == "Neumann") //Condition de flux en bas
+  {
+    for (int j = 0; j < _Nx ; j++)
+    {
+      _sol_T(_Nx*(_Ny -1)+ j) = _sol_T(_Nx*(_Ny -1)+ j)-gamma(_Nx*(_Ny -1)+ j)*_Val_CL_bas*_h_y;
+    }
+  }
+
+  if (_CL_gauche == "Neumann")  //Condition de flux à gauche
+  {
+    for (int i = 0; i < _Ny; i++)
+    {
+      _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche*_h_x;
+    }
+  }
+
+  if (_CL_gauche == "Neumann_non_constant")  //Condition de flux à gauche
+  {
+    Laplacian2D::UpdateCL(num_it);
+    for (int i = 0; i < _Ny; i++)
+    {
+      _sol_T(i*_Nx) = _sol_T(i*_Nx)-beta(i*_Nx)*_Val_CL_gauche*_h_x;
+    }
+  }
+
+  if (_CL_droite == "Neumann") //Condition de flux à droite
+  {
+    for (int i = 0; i < _Ny; i++)
+    {
+      _sol_T((i+1)*_Nx - 1) = _sol_T((i+1)*_Nx - 1)-beta((i+1)*_Nx - 1)*_Val_CL_droite*_h_x;
+    }
+  }
+}
+
+void EC_PyrolyseMV::InitializeMatrix()
+{
+  _LapMat.resize(_Nx*_Ny,_Nx*_Ny);
+
+  Eigen::VectorXd alpha;
+  Eigen::VectorXd beta_g;
+  Eigen::VectorXd beta_d;
+  Eigen::VectorXd gamma_h;
+  Eigen::VectorXd gamma_b;
+
+  alpha.resize(_Nx*_Ny);
+  beta_g.resize(_Nx*_Ny);
+  beta_d.resize(_Nx*_Ny);
+  gamma_h.resize(_Nx*_Ny);
+  gamma_b.resize(_Nx*_Ny);
+
+
+
+  for (int i=0;i<_Nx*_Ny;i++)
+    {
+      _Lambda = _lambdaMV(i);
+      double mh = _Lambda; //Moyenne des lambda à l'interface Nord
+      double mb = _Lambda; //Interface Sud
+      double mg = _Lambda; //Interface Ouest
+      double md = _Lambda; //Interface Est
+
+      if (i >= _Nx) //On n'est pas sur le bord haut
+      {
+        mh = 0.5*(_Lambda+_lambdaMV(i-_Nx));
+      }
+      if (i <= _Nx*_Ny-1 - _Nx) //On n'est pas sur le bord bas
+      {
+        mb = 0.5*(_Lambda+_lambdaMV(i+_Nx));
+      }
+      if (i%_Nx != 0)
+      {
+        mg = 0.5*(_Lambda+_lambdaMV(i-1));
+      }
+      if (i%_Nx != _Nx-1)
+      {
+        md = 0.5*(_Lambda+_lambdaMV(i+1));
+      }
+      alpha[i] = _RhoTilde(i)*_CpMV(i)/_deltaT -(mh+mb)/(_h_y*_h_y) - (mg+md)/(_h_x*_h_x);
+      beta_g[i] = mg/(_h_x*_h_x);
+      beta_d[i] = md/(_h_x*_h_x);
+      gamma_h[i] = mh/(_h_y*_h_y);
+      gamma_b[i] = mb/(_h_y*_h_y);
+    }
+
+
+  vector<Triplet<double>> liste_elem;
+
+  for (int i = 0 ; i<_Nx*_Ny ; i++)
+  {
+    liste_elem.push_back({i,i,alpha[i]});
+  }
+
+  for (int i = 0 ; i<_Ny*_Nx-1; i++)
+  {
+    if ((i+1)%_Nx!=0)
+    {
+      liste_elem.push_back({i,i+1,beta_d[i]});
+      liste_elem.push_back({i+1,i,beta_g[i+1]});
+    }
+  }
+  for (int i = 0 ; i<_Nx*(_Ny-1) ; i++)
+  {
+    liste_elem.push_back({i,_Nx+i,gamma_b[i]});
+    liste_elem.push_back({_Nx+i,i,gamma_h[_Nx+i]});
+  }
+
+  _LapMat.setFromTriplets(liste_elem.begin(), liste_elem.end());
+
+
+  if (_CL_gauche == "Neumann" or _CL_gauche == "Neumann_non_constant")
+   {
+     for (int i = 0 ; i < _Ny; i++)
+     {
+       _LapMat.coeffRef(_Nx*i,_Nx*i) += beta_g[_Nx*i];  //Bord gauche
+     }
+   }
+
+   if (_CL_droite == "Neumann")
+   {
+     for (int i = 0 ; i < _Ny; i++)
+     {
+       _LapMat.coeffRef(_Nx*(i+1) - 1, _Nx*(i+1) - 1) += beta_d[_Nx*(i+1) - 1]; //Bord droite
+     }
+   }
+
+
+   if (_CL_haut == "Neumann")
+   {
+     for (int i = 0; i < _Nx ; i++)
+     {
+       _LapMat.coeffRef(i,i) += gamma_h[i]; //Bord haut
+     }
+   }
+
+   if (_CL_bas == "Neumann")
+   {
+     for (int i = 0; i < _Nx ; i++)
+     {
+       _LapMat.coeffRef((_Ny - 1)* _Nx + i , (_Ny - 1)* _Nx + i) += gamma_b[(_Ny - 1)* _Nx + i]; //Bord bas
+     }
+   }
 }
