@@ -8,4 +8,5 @@ Commentez TOUTES vos modifications, par pitié.
 Paix et amour, so say we all.
 
 Pour compiler :
-g++ -std=c++11 -I ./EigenLibrary/Eigen -o run main.cc Laplacian2D.cpp
+(g++ -std=c++11 -I ./EigenLibrary/Eigen -o run main.cc Laplacian2D.cpp)
+maintenant "make" suffira
