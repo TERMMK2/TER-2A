@@ -1174,8 +1174,8 @@ void EC_PyrolyseMV::lambda_Cal() // On calcule Lambda à partir de _RhoTilde et 
   {
     if (_sol_T(i) < 1000)
     {
-      lv = -0.5/728.*_sol_T(i) + 1;
-      lp = 1./728.*_sol_T(i) + 1;
+      lv = -0.5/728.*_sol_T(i) + 1+0.5*272/728;
+      lp = 1./728.*_sol_T(i) + 1-272/728;
     }
     else
     {
@@ -1192,8 +1192,254 @@ void EC_PyrolyseMV::Cp_Cal() // On calcule Lambda à partir de _RhoTilde et de _
   for (int i = 0; i < _Nx*_Ny; i++)
   {
     double ksi = (_rho_v - _RhoTilde(i))/(_rho_v - _rho_p);
-    _CpMV(i) = (1-ksi)*_Cpv + ksi*_Cpp;
+    _CpMV(i) = ((1-ksi)*_Cpv*_rho_v + ksi*_Cpp*_rho_p)/_RhoTilde(i);
   }
+}
+
+void EC_PyrolyseMV::Flux_Cal(int i, int j)
+{
+  _FN = 0; _FS = 0; _FE = 0; _FO = 0;
+
+  EC_PyrolyseMV::lambda_Cal();
+
+  double Tg,Td,Tb,Th;
+  double lambda_ip, lambda_im, lambda_jp, lambda_jm;
+
+  //Modifier les valeurs limites en fonction des conditions
+  if (_CL_gauche == "Neumann" or _CL_gauche == "Neumann_non_constant")
+    Tg = _sol_T[_Nx*i+0] + _h_x*_Val_CL_gauche;
+  else
+    Tg = _Val_CL_gauche;
+
+  if (_CL_droite == "Neumann")
+    Td = _sol_T[_Nx*i+(_Nx-1)] + _h_x*_Val_CL_droite;
+  else
+    Td = _Val_CL_droite;
+
+  if (_CL_haut == "Neumann")
+    Th = _sol_T[_Nx*(_Ny-1)+j] + _h_y*_Val_CL_haut;
+  else
+    Th = _Val_CL_haut;;
+
+  if (_CL_bas == "Neumann")
+    Tb = _sol_T[_Nx*0+j] + _h_y*_Val_CL_bas;
+  else
+    Tb = _Val_CL_bas;
+
+
+  if((i>0) and (i<_Ny-1))
+    {
+      if((j>0) and (j<_Nx-1))
+	{
+    lambda_im = (_lambdaMV(i*_Nx + j)+_lambdaMV((i-1)*_Nx + j))/2;
+    lambda_ip = (_lambdaMV(i*_Nx + j)+_lambdaMV((i+1)*_Nx + j))/2;
+    lambda_jm = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +(j-1)))/2;
+    lambda_jp = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +(j+1)))/2;
+
+	  _FN = lambda_ip*(_sol_T[_Nx*(i+1)+j] - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = lambda_im*(_sol_T[_Nx*i+j] - _sol_T[_Nx*(i-1)+j])/_h_y;
+	  _FE = lambda_jp*(_sol_T[_Nx*i+(j+1)] - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = lambda_jm*(_sol_T[_Nx*i+j] - _sol_T[_Nx*i+(j-1)])/_h_x;
+	}
+      else if (j==0)
+	{
+    lambda_im = (_lambdaMV(i*_Nx + j)+_lambdaMV((i-1)*_Nx + j))/2;
+    lambda_ip = (_lambdaMV(i*_Nx + j)+_lambdaMV((i+1)*_Nx + j))/2;
+    lambda_jm = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +j))/2;
+    lambda_jp = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +(j+1)))/2;
+
+	  _FN = lambda_ip*(_sol_T[_Nx*(i+1)+j] - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = lambda_im*(_sol_T[_Nx*i+j] - _sol_T[_Nx*(i-1)+j])/_h_y;
+	  _FE = lambda_jp*(_sol_T[_Nx*i+(j+1)] - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = lambda_jm*(_sol_T[_Nx*i+j] - Tg)/_h_x;
+	}
+      else if (j==_Nx-1)
+	{
+    lambda_im = (_lambdaMV(i*_Nx + j)+_lambdaMV((i-1)*_Nx + j))/2;
+    lambda_ip = (_lambdaMV(i*_Nx + j)+_lambdaMV((i+1)*_Nx + j))/2;
+    lambda_jm = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +(j-1)))/2;
+    lambda_jp = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +j))/2;
+
+	  _FN = lambda_ip*(_sol_T[_Nx*(i+1)+j] - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = lambda_im*(_sol_T[_Nx*i+j] - _sol_T[_Nx*(i-1)+j])/_h_y;
+	  _FE = lambda_jp*(Td - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = lambda_jm*(_sol_T[_Nx*i+j] - _sol_T[_Nx*i+(j-1)])/_h_x;
+	}
+    }
+  else if (i==0)
+    {
+      if((j>0) and (j<_Nx-1))
+	{
+    lambda_im = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx + j))/2;
+    lambda_ip = (_lambdaMV(i*_Nx + j)+_lambdaMV((i+1)*_Nx + j))/2;
+    lambda_jm = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +(j-1)))/2;
+    lambda_jp = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +(j+1)))/2;
+
+	  _FN = lambda_ip*(_sol_T[_Nx*(i+1)+j] - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = lambda_im*(_sol_T[_Nx*i+j] - Tb)/_h_y;
+	  _FE = lambda_jp*(_sol_T[_Nx*i+(j+1)] - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = lambda_jm*(_sol_T[_Nx*i+j] - _sol_T[_Nx*i+(j-1)])/_h_x;
+	}
+      else if (j==0)
+	{
+
+    lambda_im = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx + j))/2;
+    lambda_ip = (_lambdaMV(i*_Nx + j)+_lambdaMV((i+1)*_Nx + j))/2;
+    lambda_jm = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +j))/2;
+    lambda_jp = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +(j+1)))/2;
+
+	  _FN = lambda_ip*(_sol_T[_Nx*(i+1)+j] - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = lambda_im*(_sol_T[_Nx*i+j] - Tb)/_h_y;
+	  _FE = lambda_jp*(_sol_T[_Nx*i+(j+1)] - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = lambda_jm*(_sol_T[_Nx*i+j] - Tg)/_h_x;
+	}
+      else if (j==_Nx-1)
+	{
+    lambda_im = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx + j))/2;
+    lambda_ip = (_lambdaMV(i*_Nx + j)+_lambdaMV((i+1)*_Nx + j))/2;
+    lambda_jm = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +(j-1)))/2;
+    lambda_jp = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx + j))/2;
+
+	  _FN = lambda_ip*(_sol_T[_Nx*(i+1)+j] - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = lambda_im*(_sol_T[_Nx*i+j] - Tb)/_h_y;
+	  _FE = lambda_jp*(Td - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = lambda_jm*(_sol_T[_Nx*i+j] - _sol_T[_Nx*i+(j-1)])/_h_x;
+	}
+    }
+  else if (i==_Ny-1)
+    {
+      if((j>0) and (j<_Nx-1))
+	{
+    lambda_im = (_lambdaMV(i*_Nx + j)+_lambdaMV((i-1)*_Nx + j))/2;
+    lambda_ip = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx + j))/2;
+    lambda_jm = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +(j-1)))/2;
+    lambda_jp = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +(j+1)))/2;
+
+	  _FN = lambda_ip*(Th - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = lambda_im*(_sol_T[_Nx*i+j] - _sol_T[_Nx*(i-1)+j])/_h_y;
+	  _FE = lambda_jp*(_sol_T[_Nx*i+(j+1)] - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = lambda_jm*(_sol_T[_Nx*i+j] - _sol_T[_Nx*i+(j-1)])/_h_x;
+	}
+      else if (j==0)
+	{
+    lambda_im = (_lambdaMV(i*_Nx + j)+_lambdaMV((i-1)*_Nx + j))/2;
+    lambda_ip = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx + j))/2;
+    lambda_jm = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +j ))/2;
+    lambda_jp = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +(j+1)))/2;
+
+	  _FN = lambda_ip*(Th - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = lambda_im*(_sol_T[_Nx*i+j] - _sol_T[_Nx*(i-1)+j])/_h_y;
+	  _FE = lambda_jp*(_sol_T[_Nx*i+(j+1)] - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = lambda_jm*(_sol_T[_Nx*i+j] -  Tg)/_h_x;
+	}
+      else if (j==_Nx-1)
+	{
+    lambda_im = (_lambdaMV(i*_Nx + j)+_lambdaMV((i-1)*_Nx + j))/2;
+    lambda_ip = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx + j))/2;
+    lambda_jm = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +(j-1)))/2;
+    lambda_jp = (_lambdaMV(i*_Nx + j)+_lambdaMV(i*_Nx +j))/2;
+
+	  _FN = lambda_ip*(Th - _sol_T[_Nx*i+j])/_h_y;
+	  _FS = lambda_im*(_sol_T[_Nx*i+j] - _sol_T[_Nx*(i-1)+j])/_h_y;
+	  _FE = lambda_jp*(Td - _sol_T[_Nx*i+j])/_h_x;
+	  _FO = lambda_jm*(_sol_T[_Nx*i+j] - _sol_T[_Nx*i+(j-1)])/_h_x;
+	}
+    }
+}
+
+void EC_PyrolyseMV::T_Cal()
+{
+  Eigen::VectorXd Tbis;
+  Tbis.resize(_Nx*_Ny);
+  for (int i =0; i<_Nx*_Ny ; i++)
+  {
+    Tbis(i) = _sol_T(i);
+  }
+
+  for (int i=0; i<_Ny; i++)
+    {
+      for (int j=0; j<_Nx; j++)
+	{
+	  EC_PyrolyseMV::Flux_Cal(i,j);
+    EC_PyrolyseMV::Cp_Cal();
+	  Tbis[i*_Nx+j] = (_deltaT*((_FE-_FO)/_h_x + (_FN-_FS)/_h_y))/(_RhoTilde[i*_Nx+j]*_CpMV[i*_Nx+j]) + Tbis[i*_Nx+j];
+    //Tbis[i*_Nx+j] = (_deltaT*((_FE-_FO)/_h_x + (_FN-_FS)/_h_y))/(1000*_Cp) + Tbis[i*_Nx+j];
+	}
+    }
+
+  for (int i =0; i<_Nx*_Ny ; i++)
+  {
+    _sol_T(i) = Tbis(i);
+  }
+
+
+
+}
+
+void EC_PyrolyseMV::Advance(int nb_iterations)
+{
+
+  ofstream* flux_pts(new ofstream);
+
+
+  if(_save_points_file != "non")
+  {
+    //Si on sauvegarde des points en particulier, on initialise l'ouverture des fichiers ici.
+    flux_pts->open(_save_points_file+".txt", ios::out);
+
+  }
+
+  for( int i=0 ; i<=nb_iterations ; i++)
+  {
+    // Systeme de sauvegarde de points :---------------------------------
+    if (_save_all_file != "non")
+    {
+      EC_PyrolyseMC::SaveSol(i);
+    }
+
+    if (_save_points_file != "non")
+    {
+      *flux_pts<<i*_deltaT<<" ";
+      //char* truc = new char;
+      for (int j=0; j<_number_saved_points; j++)
+      {
+        int pos = floor(_saved_points[j][0]/_h_x) + _Nx*floor(_saved_points[j][1]/_h_y);
+        *flux_pts<<_sol_T(pos)<<" "<<_sol_R(pos)<<" ";
+      }
+      *flux_pts<<endl;
+    }
+
+    EC_PyrolyseMC::Rho_Cal_P();
+    if (_CL_gauche == "Neumann_non_constant")
+    {
+      Laplacian2D::UpdateCL(i+1);
+    }
+    EC_PyrolyseMV::T_Cal();
+    EC_PyrolyseMC::Rho_Cal_C();
+
+
+    //Barre de chargement
+    int i_barre;
+    int p = floor((((double)i)/((double)nb_iterations))*100);
+    printf( "[" );
+    for(i_barre=0;i_barre<=p;i_barre+=2) printf( "*" );
+    for (;i_barre<100; i_barre+=2 ) printf( "-" );
+    printf( "] %3d %%", p );
+
+    for(i_barre=0;i_barre<59;++i_barre) printf( "%c", 8 );
+
+    fflush(stdout );
+
+  }
+
+  if(_save_points_file != "non")
+  {
+    flux_pts->close();
+  }
+
+  printf( "\n" );
+  delete flux_pts;
+
 }
 
 void EC_PyrolyseMV::IterativeSolver(int nb_iterations)

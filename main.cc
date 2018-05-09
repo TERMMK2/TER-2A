@@ -76,9 +76,9 @@ int main(int argc, char** argv)
     }
     else if (data_file.Get_Schema() == "Explicite")
     {
-      cout << "Explicite n'est pas encore codé tête de gland" << endl;
-      abort();
-      // Lap->Advance(nb_iterations);
+      // cout << "Explicite n'est pas encore codé tête de gland" << endl;
+      // abort();
+      Lap->Advance(nb_iterations);
     }
     else
     {

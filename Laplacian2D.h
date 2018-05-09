@@ -98,6 +98,9 @@ class EC_PyrolyseMV : public EC_PyrolyseMC
   void Initialize (DataFile datafile);
   void lambda_Cal();
   void Cp_Cal();
+  void Advance(int nb_iterations); //version explicite
+  void T_Cal(); //Calcul de T si Cp est variable
+  void Flux_Cal(int i, int j); // Lambda variable
   void InitializeMatrix();
   void IterativeSolver(int nb_iterations);
   void ConditionsLimites(int num_it);
