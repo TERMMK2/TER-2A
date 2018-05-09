@@ -1719,8 +1719,13 @@ void EC_PyrolyseMV::Newton(double epsilon)
   double residu = G.norm();
   while (residu > epsilon)
   {
+    cout << residu << endl;
     _f = solver.solve(-G);
     xk += _f;
+    _sol_T = xk;
+    lambda_Cal();
+    EC_PyrolyseMV::InitializeMatrix();
+    solver.compute(_LapMat);
     G = _LapMat*xk - C;
     residu = G.norm();
   }
