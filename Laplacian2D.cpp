@@ -1519,6 +1519,7 @@ void EC_PyrolyseMV::ConditionsLimites(int num_it)
   for (int i=0;i<_Nx*_Ny;i++)
   {
     _Lambda = _lambdaMV(i);
+    _Cp = _CpMV(i);
     alpha[i] = 1 + 2*(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_x*_h_x) + 2*(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_y*_h_y);
     beta[i] = -(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_x*_h_x);
     gamma[i] = -(_Lambda/(_RhoTilde[i]*_Cp))*_deltaT/(_h_y*_h_y);
@@ -1637,11 +1638,11 @@ void EC_PyrolyseMV::InitializeMatrix()
       {
         md = 0.5*(_Lambda+_lambdaMV(i+1));
       }
-      alpha[i] = _RhoTilde(i)*_CpMV(i)/_deltaT -(mh+mb)/(_h_y*_h_y) - (mg+md)/(_h_x*_h_x);
-      beta_g[i] = mg/(_h_x*_h_x);
-      beta_d[i] = md/(_h_x*_h_x);
-      gamma_h[i] = mh/(_h_y*_h_y);
-      gamma_b[i] = mb/(_h_y*_h_y);
+      alpha[i] = _RhoTilde(i)*_CpMV(i)/_deltaT +(mh+mb)/(_h_y*_h_y) + (mg+md)/(_h_x*_h_x);
+      beta_g[i] = -mg/(_h_x*_h_x);
+      beta_d[i] = -md/(_h_x*_h_x);
+      gamma_h[i] = -mh/(_h_y*_h_y);
+      gamma_b[i] = -mb/(_h_y*_h_y);
     }
 
 
@@ -1716,10 +1717,10 @@ void EC_PyrolyseMV::Newton(double epsilon)
     C[i] = _RhoTilde[i]*_CpMV[i]*_sol_T[i]/_deltaT;
   }
   G = _LapMat*xk - C;
-  double residu = G.norm();
-  while (residu > epsilon)
+  double erreur = G.norm()/_sol_T.norm();
+  while (erreur > epsilon)
   {
-    cout << residu << endl;
+    //cout << erreur << endl;
     _f = solver.solve(-G);
     xk += _f;
     _sol_T = xk;
@@ -1727,7 +1728,7 @@ void EC_PyrolyseMV::Newton(double epsilon)
     EC_PyrolyseMV::InitializeMatrix();
     solver.compute(_LapMat);
     G = _LapMat*xk - C;
-    residu = G.norm();
+    erreur = G.norm()/_sol_T.norm();
   }
   _sol_T = xk;
 }

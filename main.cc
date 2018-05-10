@@ -60,11 +60,6 @@ int main(int argc, char** argv)
     {
       Lap->Advance(nb_iterations);
     }
-    else
-    {
-      cout << "Ecrire Explicite ou Implicite pour le schéma" << endl;
-      abort();
-    }
   }
   if (data_file.Get_eq() == "EC_PyrolyseMV")
   {
@@ -80,12 +75,8 @@ int main(int argc, char** argv)
       // abort();
       Lap->Advance(nb_iterations);
     }
-    else
-    {
-      cout << "Ecrire Explicite ou Implicite pour le schéma" << endl;
-      abort();
-    }
   }
+  delete Lap;
   return 0;
 }
 
