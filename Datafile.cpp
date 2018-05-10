@@ -501,7 +501,7 @@ void DataFile::ReadDataFile()
   if ((!_if_Cpv) and (_eq =="EC_PyrolyseMV"))//truc à faire pour la pyro plus compliquée
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention, le Cpv par défaut est utilisé (1500.).-" << endl;
+      cout << "Attention, le Cpv par défaut est utilisé (1000.).-" << endl;
       _Cpv = 1000.;
     }
 
