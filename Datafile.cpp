@@ -44,6 +44,7 @@ void DataFile::ReadDataFile()
     {
       cout << "--------------------------------------------------" << endl;
       cout << "Reading data file " << _file_name << endl;
+      cout << "---------------------------------------------------"<< endl<<endl;
     }
 
   string file_line;
@@ -494,14 +495,14 @@ void DataFile::ReadDataFile()
   if ((!_if_Cpp) and (_eq =="EC_PyrolyseMV"))//truc à faire pour la pyro plus compliquée
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention, le Cpp par défaut est utilisé (1500.).-" << endl;
+      cout << "Attention, le Cpp par défaut est utilisé (1500.).--" << endl;
       _Cpp = 1500.;
     }
 
   if ((!_if_Cpv) and (_eq =="EC_PyrolyseMV"))//truc à faire pour la pyro plus compliquée
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention, le Cpv par défaut est utilisé (1000.).-" << endl;
+      cout << "Attention, le Cpv par défaut est utilisé (1000.).--" << endl;
       _Cpv = 1000.;
     }
 
@@ -562,18 +563,17 @@ void DataFile::ReadDataFile()
       _Schema = "Implicite";
     }
 
-  if (!_if_save_all_file)
+  if ((!_if_save_all_file) or (_save_all_file =="non"))
     {
       cout << "---------------------------------------------------" << endl;
       cout << "Attention, la solution ne sera pas sauvegardé dans sa totalité" << endl;
       _save_all_file = "non";
     }
 
-  if (!_if_save_points_file)
+  if ((!_if_save_points_file) or (_save_points_file == "non"))
     {
       cout << "---------------------------------------------------" << endl;
-      cout << "Attention, il manque un ou plusieurs points à sauvegarder" << endl;
-      cout << "Nous n'allons donc pas sauvegarder de points de points" <<endl;
+      cout << "Attention, la solution ne sera sauvegardé en aucun point."<<endl;
       _save_points_file = "non";
     }
 
@@ -594,7 +594,38 @@ void DataFile::ReadDataFile()
     }
 
   //Rajouter une vérification que les points sont bien sur la plaque !!!!
+  if (_save_points_file != "non")
+    {
+      bool test = false;
+      int pts_supr =0;
 
+      for(int i=0 ; i< _number_saved_points ; i++)
+	{
+	  if ((_saved_points[i-pts_supr][0] > _x_max) or  (_saved_points[i-pts_supr][0] < _x_min) or (_saved_points[i-pts_supr][1] > _y_max) or  (_saved_points[i-pts_supr][1] < _y_min))
+	    {
+	      std::vector< vector<double> >::iterator it = _saved_points.begin();
+	      std::advance(it, i-pts_supr);
+	      _saved_points.erase(_saved_points.begin() + i - pts_supr);
+	      pts_supr ++;
+	      test = true;
+	    } // CA MARCHE PAS !
+	}
+      
+      if(test)
+	{
+	  cout << "---------------------------------------------------" << endl;
+	  cout << "Attention, vous avez choisi d'enregistrer "<< pts_supr<<" point en dehors de la plaque." << endl;
+	  cout << "Nous avons donc suprimé ce ou ces point------------" << endl;
+	  _number_saved_points -= pts_supr;
+	}
+      if(_number_saved_points == 0)
+	{
+	  cout << "---------------------------------------------------" << endl;
+	  cout << "Attention, tout les points que vous avez choisi d'enregistrer n'étaient pas sur la plaque." << endl;
+	  cout << "Nous n'allons donc pas sauvegarder de points.------" << endl;
+	  _save_points_file = "non";
+	}
+    }
 
 
 
@@ -610,7 +641,7 @@ void DataFile::ReadDataFile()
       cout << "---------------------------------------------------" <<endl;
       cout << "---------------------------------------------------" <<endl<<endl<<endl;
 
-      cout << "Non je déconne, mais en vrai t'as pas mis de fichier de sauvegarde donctu risque pas de voir si ça a marché ou non (bon sauf si tu regarde juste si ta partie du code marche sans erreur, mais tu peux être sûr qu'il n'y a pas d'erreur si tu regarde pas la solution non ?)" <<endl<<endl;
+      cout << "Non je déconne, mais en vrai t'as pas mis de fichier de sauvegarde donc tu risque pas de voir si ça a marché ou non (bon sauf si tu regarde juste si ta partie du code marche sans erreur, mais tu peux pas être sûr qu'il n'y a pas d'erreur si tu regarde pas la solution, non ?" <<endl<<endl;
       cout << "Bref, je vais pas faire un stop au programme parce que je sais pas le faire mais sache que si ton PC fait des calculs en se moment, ils servent à rien."<<endl;
       cout << "Sur ce mon message est fini, bonne journée à toi, jeune utilisateur quelque peu étourdi"<<endl;
       cout << "P.S. : saucissons" <<endl;
@@ -620,7 +651,7 @@ void DataFile::ReadDataFile()
       cout << "P.P.P.P.P.S. : 635318657" <<endl;
       cout << "P.P.P.P.P.P.S. : Saura tu trouver de quelle suite il s'agit ?" << endl;
       cout << "P.P.P.P.P.P.P.S. : Ainsi que le terme suivant ?" <<endl;
-      cout << "P.P.P.P.P.P.P.P.S. : En vrai te fatique pas c'est un problème ouvert de math de calculer le suivant, alors à moins que tu as 2 ans devant toi et un super calculateur tu trouvera surrement pas sans une idée de génie."<<endl;
+      cout << "P.P.P.P.P.P.P.P.S. : En vrai te fatigue pas c'est un problème ouvert de math de calculer le suivant, alors à moins que tu as 2 ans devant toi et un super calculateur tu trouvera surrement pas sans une idée de génie."<<endl;
       cout << "P.P.P.P.P.P.P.P.P.S. : J'ai perdu ma soirée à essayer de le trouver avant de m'en rendre compte. :'(" <<endl;
       cout << "P.P.P.P.P.P.P.P.P.P.S. : Mais j'ai appris plein de truc, ce qui est cool." <<endl;
       cout << "P.P.P.P.P.P.P.P.P.P.P.S : Sur ce je vais me coucher en essayant de faire marcher git" <<endl;
@@ -633,7 +664,10 @@ void DataFile::ReadDataFile()
       _restart_file = "non";
     }
 
+  cout <<endl;
+  cout<<"---------------------------------------------------"<<endl;
   cout<<"Fin de la lecture de donnée"<<endl;
+  cout<<"---------------------------------------------------"<<endl<<endl;
 }
 
 
